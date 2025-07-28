@@ -1,0 +1,20 @@
+{
+ "cards": [],
+ "charts": [
+  {
+   "width": "Half"
+  }
+ ],
+ "creation": "2025-07-26 16:22:50.360003",
+ "dashboard_name": "Ai Inventory Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2025-07-26 16:22:50.360003",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "Ai Inventory Dashboard",
+ "owner": "Administrator"
+}

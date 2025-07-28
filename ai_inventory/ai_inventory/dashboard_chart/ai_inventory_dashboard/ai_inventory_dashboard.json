@@ -1,0 +1,41 @@
+{
+ "based_on": "",
+ "chart_name": "AI Inventory Dashboard",
+ "chart_type": "Report",
+ "creation": "2025-07-26 19:28:02.474837",
+ "currency": "",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "AI Inventory Forecast",
+ "dynamic_filters_json": "{}",
+ "filters_json": "{\"from_date\":\"2025-04-29\",\"to_date\":\"2025-07-28\",\"company\":\"\",\"reorder_alert\":0,\"low_confidence\":0,\"critical_items_only\":0,\"non_moving_only\":0,\"slow_moving_only\":0,\"high_value_items\":0,\"min_confidence\":0}",
+ "group_by_type": "Count",
+ "idx": 2,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2025-07-28 11:19:44.231280",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Inventory Dashboard",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "report_name": "AI Inventory Dashboard",
+ "roles": [
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  }
+ ],
+ "source": "",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 1,
+ "value_based_on": "",
+ "x_field": "",
+ "y_axis": []
+}

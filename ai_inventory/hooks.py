@@ -22,8 +22,118 @@ app_license = "mit"
 # ]
 
 # Includes in <head>
-# ------------------
+# Document Events
+# ---------------
+# Document Events with Safety Wrappers
+# ai_inventory/hooks.py
+# UPDATED VERSION - Replace your existing hooks.py
 
+app_name = "ai_inventory"
+app_title = "Ai Inventory"
+app_publisher = "sammish"
+app_description = "Ai Inventory"
+app_email = "sammish.thundiyil@gmail.com"
+app_license = "mit"
+
+# Document Events with Safety Wrappers
+doc_events = {
+    "Stock Ledger Entry": {
+        "on_submit": "ai_inventory.hooks_handlers.on_stock_ledger_entry_submit_safe"
+    },
+    "Purchase Order": {
+        "on_submit": "ai_inventory.hooks_handlers.on_purchase_order_submit_safe"
+    },
+    "Purchase Receipt": {
+        "on_submit": "ai_inventory.hooks_handlers.on_purchase_receipt_submit_safe"
+    },
+    "Item": {
+        "after_insert": "ai_inventory.hooks_handlers.on_item_after_insert_safe",
+        "on_update": "ai_inventory.hooks_handlers.on_item_on_update_safe"
+    },
+    "Warehouse": {
+        "after_insert": "ai_inventory.hooks_handlers.on_warehouse_after_insert_safe"
+    },
+    "AI Inventory Forecast": {
+        "validate": "ai_inventory.hooks_handlers.validate_ai_inventory_forecast_safe",
+        "on_save": "ai_inventory.hooks_handlers.on_ai_inventory_forecast_save_safe"
+    },
+    "Bin": {
+        "on_update": "ai_inventory.hooks_handlers.on_bin_update_safe"
+    },
+    "Stock Entry": {
+        "on_submit": "ai_inventory.hooks_handlers.on_stock_entry_submit_safe"
+    },
+    "Sales Order": {
+        "on_submit": "ai_inventory.hooks_handlers.on_sales_order_submit_safe"
+    }
+}
+
+# Scheduled Tasks
+scheduler_events = {
+    # Real-time monitoring (every 5 minutes)
+    "cron": {
+        "*/5 * * * *": [
+            "ai_inventory.scheduled_tasks.real_time_stock_monitor"
+        ]
+    },
+    
+    # Hourly tasks
+    "hourly": [
+        "ai_inventory.scheduled_tasks.hourly_critical_stock_check",
+        "ai_inventory.hooks_handlers.process_forecast_update_queue"
+    ],
+    
+    # Daily tasks (6 AM)
+    "daily": [
+        "ai_inventory.scheduled_tasks.daily_ai_forecast",
+        "ai_inventory.hooks_handlers.daily_create_missing_forecasts",
+        "ai_inventory.ml_supplier_analyzer.daily_ml_supplier_analysis"
+    ],
+    
+    # Weekly tasks (Sunday 7 AM)
+    "weekly": [
+        "ai_inventory.scheduled_tasks.weekly_forecast_analysis",
+        "ai_inventory.ml_supplier_analyzer.weekly_supplier_segmentation"
+    ],
+    
+    # Monthly tasks (1st of month, 8 AM)
+    "monthly": [
+        "ai_inventory.scheduled_tasks.optimize_forecast_performance",
+        "ai_inventory.scheduled_tasks.cleanup_old_forecast_data"
+    ]
+}
+
+# Installation Hooks
+after_install = "ai_inventory.install.after_install"
+before_uninstall = "ai_inventory.install.before_uninstall"
+
+# Fixtures
+fixtures = [
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            [
+                "dt", "in", [
+                    "Purchase Order Item",
+                    "Supplier", 
+                    "AI Inventory Forecast"
+                ]
+            ]
+        ]
+    },
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            [
+                "doc_type", "in", [
+                    "Purchase Order Item",
+                    "Supplier",
+                    "AI Inventory Forecast"
+                ]
+            ]
+        ]
+    }
+]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ai_inventory/css/ai_inventory.css"
 # app_include_js = "/assets/ai_inventory/js/ai_inventory.js"

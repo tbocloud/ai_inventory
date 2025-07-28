@@ -1,0 +1,113 @@
+{
+ "charts": [
+  {
+   "chart_name": "AI Inventory Dashboard",
+   "label": "AI Inventory Dashboard"
+  }
+ ],
+ "content": "[{\"id\":\"X8cZOP3Yco\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AI Analytics</span>\",\"col\":12}},{\"id\":\"vxCZ3SpHVP\",\"type\":\"chart\",\"data\":{\"chart_name\":\"AI Inventory Dashboard\",\"col\":6}},{\"id\":\"cT08CKQPHK\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mk9aYdOVS1\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory\",\"col\":4}},{\"id\":\"KnDKQhD1dl\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory Reports\",\"col\":4}}]",
+ "creation": "2025-07-26 19:20:28.437822",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "today",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "AI Analytics",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Inventory",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Inventory Dashboard",
+   "link_count": 0,
+   "link_to": "AI Inventory Dashboard",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Inventory Forecast",
+   "link_count": 0,
+   "link_to": "AI Inventory Forecast",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Forecast Sync Log",
+   "link_count": 0,
+   "link_to": "AI Forecast Sync Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Inventory Reports",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "AI Inventory Dashboard Report",
+   "link_count": 0,
+   "link_to": "AI Inventory Dashboard",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Forecast Accuracy Analysis",
+   "link_count": 0,
+   "link_to": "Forecast Accuracy Analysis",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Movement Prediction",
+   "link_count": 0,
+   "link_to": "Stock Movement Prediction",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-07-28 11:31:11.179677",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Analytics",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [],
+ "title": "AI Analytics"
+}

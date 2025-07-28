@@ -1,0 +1,274 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-26 16:13:12.852727",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "item_code",
+  "item_name",
+  "item_group",
+  "column_break_4",
+  "warehouse",
+  "current_stock",
+  "last_purchase_date",
+  "company",
+  "section_break_8",
+  "forecast_period_days",
+  "predicted_consumption",
+  "movement_type",
+  "confidence_score",
+  "column_break_13",
+  "reorder_level",
+  "suggested_qty",
+  "reorder_alert",
+  "last_forecast_date",
+  "section_break_17",
+  "historical_data",
+  "forecast_details",
+  "section_break_20",
+  "auto_create_po",
+  "supplier",
+  "lead_time_days",
+  "column_break_dhmj",
+  "preferred_supplier",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "AIF-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_stock",
+   "fieldtype": "Float",
+   "label": "Current Stock Qty",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_purchase_date",
+   "fieldtype": "Date",
+   "label": "Last Purchase Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "AI Forecast Results"
+  },
+  {
+   "default": "30",
+   "fieldname": "forecast_period_days",
+   "fieldtype": "Int",
+   "label": "Forecast Period (Days)"
+  },
+  {
+   "fieldname": "predicted_consumption",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Predicted Consumption",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "movement_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Movement Type",
+   "options": "\nFast Moving\nSlow Moving\nNon Moving\nCritical",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confidence_score",
+   "fieldtype": "Percent",
+   "label": "Prediction Confidence",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reorder_level",
+   "fieldtype": "Float",
+   "label": "AI Suggested Reorder Level",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "suggested_qty",
+   "fieldtype": "Float",
+   "label": "Suggested Order Qty",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reorder_alert",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Reorder Alert",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_forecast_date",
+   "fieldtype": "Datetime",
+   "label": "Last Forecast Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break",
+   "label": "Analysis Details"
+  },
+  {
+   "fieldname": "historical_data",
+   "fieldtype": "Long Text",
+   "label": "Historical Data Summary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "forecast_details",
+   "fieldtype": "Long Text",
+   "label": "Detailed Forecast Analysis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break",
+   "label": "Purchase Order Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_create_po",
+   "fieldtype": "Check",
+   "label": "Auto Create Purchase Order"
+  },
+  {
+   "default": "7",
+   "fieldname": "lead_time_days",
+   "fieldtype": "Int",
+   "label": "Lead Time (Days)"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "description": "ML-analyzed preferred supplier",
+   "fieldname": "preferred_supplier",
+   "fieldtype": "Link",
+   "label": "Preferred Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dhmj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Preferred Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "AI Inventory Forecast",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-28 07:41:06.963311",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Inventory Forecast",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

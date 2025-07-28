@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-27 19:50:57.471162",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_2",
+  "auto_sync_enabled",
+  "sync_frequency",
+  "auto_refresh_status",
+  "last_sync_time",
+  "auto_submit_po",
+  "column_break_sadh",
+  "forecast_period_days",
+  "default_lead_time_days",
+  "auto_create_po_threshold",
+  "column_break_lkqs",
+  "success_rate_last_sync",
+  "total_forecasts_last_sync",
+  "confidence_threshold",
+  "section_break_12",
+  "performance_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "( Inventory )Sync Settings & Forecast Parameters"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_sync_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Auto Sync"
+  },
+  {
+   "default": "Daily",
+   "depends_on": "auto_sync_enabled",
+   "fieldname": "sync_frequency",
+   "fieldtype": "Select",
+   "label": "Sync Frequency",
+   "options": "Daily\nWeekly\nHourly"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_refresh_status",
+   "fieldtype": "Check",
+   "label": "Auto Refresh Status"
+  },
+  {
+   "default": "30",
+   "fieldname": "forecast_period_days",
+   "fieldtype": "Int",
+   "label": "Default Forecast Period (Days)"
+  },
+  {
+   "default": "14",
+   "fieldname": "default_lead_time_days",
+   "fieldtype": "Int",
+   "label": "Default Lead Time (Days)"
+  },
+  {
+   "default": "70",
+   "fieldname": "confidence_threshold",
+   "fieldtype": "Int",
+   "label": "Minimum Confidence Threshold (%)"
+  },
+  {
+   "default": "85",
+   "fieldname": "auto_create_po_threshold",
+   "fieldtype": "Int",
+   "label": "Auto Create PO Confidence Threshold (%)"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_submit_po",
+   "fieldtype": "Check",
+   "label": "Auto Submit Purchase Orders"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break",
+   "label": "Performance Tracking"
+  },
+  {
+   "fieldname": "performance_notes",
+   "fieldtype": "Long Text",
+   "label": "Performance Notes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_sync_time",
+   "fieldtype": "Datetime",
+   "label": "Last Sync Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_forecasts_last_sync",
+   "fieldtype": "Int",
+   "label": "Total Forecasts (Last Sync)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "success_rate_last_sync",
+   "fieldtype": "Percent",
+   "label": "Success Rate (Last Sync)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_sadh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lkqs",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-07-27 20:13:41.529634",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Inventory Dashboard",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

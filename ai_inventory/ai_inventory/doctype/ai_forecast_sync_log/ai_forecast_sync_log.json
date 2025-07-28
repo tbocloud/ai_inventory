@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-07-26 20:33:03.518421",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "sync_date",
+  "sync_time",
+  "sync_type",
+  "company",
+  "column_break_5",
+  "total_items",
+  "successful_items",
+  "failed_items",
+  "success_rate",
+  "reorder_alerts",
+  "section_break_11",
+  "sync_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "options": "SYNC-LOG-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Sync Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Sync Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sync Type",
+   "options": "Manual Sync\nScheduled Sync\nBackground Sync\nEmergency Sync",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_items",
+   "fieldtype": "Int",
+   "label": "Total Items",
+   "reqd": 1
+  },
+  {
+   "fieldname": "successful_items",
+   "fieldtype": "Int",
+   "label": "Successful Items",
+   "reqd": 1
+  },
+  {
+   "fieldname": "failed_items",
+   "fieldtype": "Int",
+   "label": "Failed Items"
+  },
+  {
+   "fieldname": "success_rate",
+   "fieldtype": "Percent",
+   "label": "Success Rate",
+   "precision": "2"
+  },
+  {
+   "fieldname": "reorder_alerts",
+   "fieldtype": "Int",
+   "label": "Reorder Alerts Generated"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "label": "Sync Details"
+  },
+  {
+   "fieldname": "sync_details",
+   "fieldtype": "Long Text",
+   "label": "Sync Details (JSON)"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-27 09:03:49.082995",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Forecast Sync Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "sync_type",
+ "track_changes": 1
+}
