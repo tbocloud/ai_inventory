@@ -1,32 +1,12 @@
+# ai_inventory/hooks.py
+# UPDATED VERSION - Replace your existing hooks.py
+
 app_name = "ai_inventory"
 app_title = "Ai Inventory"
 app_publisher = "sammish"
 app_description = "Ai Inventory"
 app_email = "sammish.thundiyil@gmail.com"
 app_license = "mit"
-
-# Apps
-# ------------------
-
-# required_apps = []
-
-# Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "ai_inventory",
-# 		"logo": "/assets/ai_inventory/logo.png",
-# 		"title": "Ai Inventory",
-# 		"route": "/ai_inventory",
-# 		"has_permission": "ai_inventory.api.permission.has_app_permission"
-# 	}
-# ]
-
-# Includes in <head>
-# Document Events
-# ---------------
-# Document Events with Safety Wrappers
-# ai_inventory/hooks.py
-# UPDATED VERSION - Replace your existing hooks.py
 
 # Document Events with Safety Wrappers
 doc_events = {
@@ -96,7 +76,8 @@ scheduler_events = {
     ]
 }
 
-# Installation Hooks
+# Installation Hooks - CRITICAL: This ensures packages are installed BEFORE DocType creation
+before_install = "ai_inventory.install.before_install"
 after_install = "ai_inventory.install.after_install"
 before_uninstall = "ai_inventory.install.before_uninstall"
 
@@ -127,13 +108,7 @@ fixtures = [
         ]
     }
 ]
-# In hooks.py
-required_apps = []
-required_packages = [
-    "numpy>=1.21.0",
-    "pandas>=1.3.0", 
-    "scikit-learn>=1.0.0"
-]
+
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ai_inventory/css/ai_inventory.css"
 # app_include_js = "/assets/ai_inventory/js/ai_inventory.js"
@@ -351,4 +326,3 @@ required_packages = [
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-
