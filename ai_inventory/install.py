@@ -1,20 +1,24 @@
 # ai_inventory/install.py
-# UPDATED VERSION - Replace your existing install.py
+# IMPROVED VERSION with better package management
 
 import frappe
 import subprocess
 import sys
 import os
+import importlib.util
 
 def after_install():
-    """Run after app installation - FIXED VERSION"""
+    """Run after app installation - IMPROVED VERSION"""
     try:
         print("Starting AI Inventory post-installation setup...")
         
-        # Install required Python packages
+        # Install required Python packages FIRST
         install_required_packages()
         
-        # Create necessary custom fields FIRST
+        # Verify packages are properly installed
+        verify_package_installation()
+        
+        # Create necessary custom fields
         create_custom_fields()
         
         # Setup scheduler
@@ -28,9 +32,10 @@ def after_install():
     except Exception as e:
         frappe.log_error(f"AI Inventory installation failed: {str(e)}")
         print(f"Installation failed: {str(e)}")
+        raise e
 
 def install_required_packages():
-    """Install required Python packages"""
+    """Install required Python packages with better error handling"""
     packages = [
         'numpy',
         'pandas', 
@@ -39,16 +44,109 @@ def install_required_packages():
     
     print("Installing required Python packages...")
     
+    # Check if we're in a virtual environment
+    virtual_env = os.environ.get('VIRTUAL_ENV')
+    if virtual_env:
+        print(f"✓ Using virtual environment: {virtual_env}")
+    
+    failed_packages = []
+    
     for package in packages:
         try:
+            # First check if package is already installed
+            if is_package_installed(package):
+                print(f"✓ {package} already installed")
+                continue
+                
             print(f"Installing {package}...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+            
+            # Use the same Python executable that's running Frappe
+            result = subprocess.run([
+                sys.executable, "-m", "pip", "install", package, "--upgrade"
+            ], capture_output=True, text=True, check=True)
+            
             print(f"✓ {package} installed successfully")
+            
+            # Verify installation immediately
+            if not is_package_installed(package):
+                raise Exception(f"Package {package} installation verification failed")
+                
         except subprocess.CalledProcessError as e:
-            print(f"✗ Failed to install {package}: {str(e)}")
-            frappe.log_error(f"Package installation failed: {package} - {str(e)}")
+            error_msg = f"Failed to install {package}: {e.stderr if e.stderr else str(e)}"
+            print(f"✗ {error_msg}")
+            failed_packages.append(package)
+            frappe.log_error(f"Package installation failed: {package} - {error_msg}")
+            
         except Exception as e:
-            print(f"✗ Error installing {package}: {str(e)}")
+            error_msg = f"Error installing {package}: {str(e)}"
+            print(f"✗ {error_msg}")
+            failed_packages.append(package)
+            frappe.log_error(error_msg)
+    
+    if failed_packages:
+        print(f"\n⚠️  Warning: Failed to install packages: {', '.join(failed_packages)}")
+        print("You may need to install these manually:")
+        for pkg in failed_packages:
+            print(f"  ./env/bin/pip install {pkg}")
+        
+        # Don't fail the entire installation for package issues
+        # frappe.throw(f"Failed to install required packages: {', '.join(failed_packages)}")
+
+def is_package_installed(package_name):
+    """Check if a Python package is installed and importable"""
+    try:
+        spec = importlib.util.find_spec(package_name)
+        return spec is not None
+    except ImportError:
+        return False
+    except Exception:
+        return False
+
+def verify_package_installation():
+    """Verify that all required packages are properly installed"""
+    print("Verifying package installations...")
+    
+    packages_to_verify = {
+        'numpy': 'np',
+        'pandas': 'pd',
+        'scikit-learn': 'sklearn'
+    }
+    
+    verification_results = {}
+    
+    for package, import_name in packages_to_verify.items():
+        try:
+            if import_name == 'sklearn':
+                # Special case for scikit-learn
+                import sklearn
+                verification_results[package] = True
+                print(f"✓ {package} verified (version: {sklearn.__version__})")
+            elif import_name == 'np':
+                import numpy as np
+                verification_results[package] = True
+                print(f"✓ {package} verified (version: {np.__version__})")
+            elif import_name == 'pd':
+                import pandas as pd
+                verification_results[package] = True
+                print(f"✓ {package} verified (version: {pd.__version__})")
+        except ImportError as e:
+            verification_results[package] = False
+            print(f"✗ {package} import failed: {str(e)}")
+        except Exception as e:
+            verification_results[package] = False
+            print(f"✗ {package} verification error: {str(e)}")
+    
+    failed_verifications = [pkg for pkg, result in verification_results.items() if not result]
+    
+    if failed_verifications:
+        warning_msg = f"Package verification failed for: {', '.join(failed_verifications)}"
+        print(f"⚠️  {warning_msg}")
+        frappe.log_error(f"Package verification failed: {warning_msg}")
+        
+        # Provide manual installation instructions
+        print("\nManual installation commands:")
+        for pkg in failed_verifications:
+            print(f"  ./env/bin/pip install {pkg} --upgrade")
 
 def create_custom_fields():
     """Create custom fields for enhanced functionality - FIXED"""
@@ -315,4 +413,29 @@ def create_missing_fields_manually():
         return {
             "status": "error", 
             "message": str(e)
+        }
+
+# Utility function to check package dependencies before running ML tasks
+@frappe.whitelist()
+def check_ml_dependencies():
+    """Check if all ML dependencies are available"""
+    try:
+        import numpy as np
+        import pandas as pd
+        import sklearn
+        
+        return {
+            "status": "success",
+            "message": "All ML dependencies are available",
+            "versions": {
+                "numpy": np.__version__,
+                "pandas": pd.__version__,
+                "scikit-learn": sklearn.__version__
+            }
+        }
+    except ImportError as e:
+        return {
+            "status": "error",
+            "message": f"Missing ML dependency: {str(e)}",
+            "suggestion": "Run: ./env/bin/pip install numpy pandas scikit-learn"
         }

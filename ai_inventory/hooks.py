@@ -28,13 +28,6 @@ app_license = "mit"
 # ai_inventory/hooks.py
 # UPDATED VERSION - Replace your existing hooks.py
 
-app_name = "ai_inventory"
-app_title = "Ai Inventory"
-app_publisher = "sammish"
-app_description = "Ai Inventory"
-app_email = "sammish.thundiyil@gmail.com"
-app_license = "mit"
-
 # Document Events with Safety Wrappers
 doc_events = {
     "Stock Ledger Entry": {
@@ -133,6 +126,13 @@ fixtures = [
             ]
         ]
     }
+]
+# In hooks.py
+required_apps = []
+required_packages = [
+    "numpy>=1.21.0",
+    "pandas>=1.3.0", 
+    "scikit-learn>=1.0.0"
 ]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ai_inventory/css/ai_inventory.css"
