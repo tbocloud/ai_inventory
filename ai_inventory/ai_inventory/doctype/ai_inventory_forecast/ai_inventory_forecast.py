@@ -1000,3 +1000,423 @@ def create_forecasts_for_all_existing_items():
             "message": error_msg,
             "forecasts_created": 0
         }
+    
+    # ... existing code above ...
+
+    # Add the following methods right before the existing @frappe.whitelist() functions
+
+@frappe.whitelist()
+def get_setup_status(company=None):
+    """Get AI Inventory setup status and recommendations"""
+    try:
+        # Build filters
+        filters = {}
+        if company:
+            filters["company"] = company
+        
+        # Get basic statistics
+        total_items = frappe.db.count("Item", {"is_stock_item": 1, "disabled": 0})
+        total_warehouses = frappe.db.count("Warehouse", {"disabled": 0})
+        
+        # Get forecast statistics
+        total_forecasts = frappe.db.count("AI Inventory Forecast", filters)
+        
+        # Get forecasts with reorder alerts
+        alert_filters = filters.copy()
+        alert_filters["reorder_alert"] = 1
+        reorder_alerts = frappe.db.count("AI Inventory Forecast", alert_filters)
+        
+        # Calculate coverage
+        possible_combinations = total_items * total_warehouses
+        forecast_coverage = (total_forecasts / possible_combinations * 100) if possible_combinations > 0 else 0
+        
+        # Get recent updates
+        recent_updates = frappe.db.sql("""
+            SELECT COUNT(*) as count
+            FROM `tabAI Inventory Forecast`
+            WHERE last_forecast_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            {}
+        """.format("AND company = %(company)s" if company else ""), 
+        {"company": company} if company else {}, as_dict=True)
+        
+        recent_count = recent_updates[0]['count'] if recent_updates else 0
+        
+        # Generate issues and recommendations
+        issues = []
+        recommendations = []
+        
+        if total_items == 0:
+            issues.append("No stock items found in the system")
+        elif total_forecasts == 0:
+            issues.append("No AI Inventory Forecasts have been created")
+            recommendations.append("Click 'Create for All Items' to set up forecasts")
+        elif forecast_coverage < 50:
+            issues.append(f"Low forecast coverage: {forecast_coverage:.1f}%")
+            recommendations.append("Use 'Fix Missing Forecasts' to improve coverage")
+        
+        if reorder_alerts > 0:
+            recommendations.append(f"Review {reorder_alerts} items that need reordering")
+        
+        if recent_count < total_forecasts * 0.1:
+            recommendations.append("Run 'Sync All Forecasts' to update predictions")
+        
+        # Check ML dependencies
+        try:
+            import numpy, pandas, sklearn
+            ml_available = True
+        except ImportError:
+            ml_available = False
+            issues.append("ML packages not installed - using basic forecasting")
+            recommendations.append("Install numpy, pandas, scikit-learn for advanced AI features")
+        
+        return {
+            "status": "success",
+            "setup_status": {
+                "total_items": total_items,
+                "total_warehouses": total_warehouses,
+                "total_forecasts": total_forecasts,
+                "forecast_coverage": round(forecast_coverage, 1),
+                "reorder_alerts": reorder_alerts,
+                "recent_updates": recent_count,
+                "ml_available": ml_available,
+                "issues": issues,
+                "recommendations": recommendations,
+                "company": company
+            }
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Get setup status failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist()
+def get_simple_sync_status():
+    """Get simple sync status for dashboard"""
+    try:
+        # Get basic forecast statistics
+        stats = frappe.db.sql("""
+            SELECT 
+                COUNT(*) as total_forecasts,
+                COUNT(CASE WHEN reorder_alert = 1 THEN 1 END) as current_alerts,
+                COUNT(CASE WHEN DATE(last_forecast_date) = CURDATE() THEN 1 END) as updated_today,
+                AVG(NULLIF(confidence_score, 0)) as avg_confidence
+            FROM `tabAI Inventory Forecast`
+        """, as_dict=True)
+        
+        current_stats = stats[0] if stats else {
+            "total_forecasts": 0,
+            "current_alerts": 0,
+            "updated_today": 0,
+            "avg_confidence": 0
+        }
+        
+        return {
+            "status": "success",
+            "current_stats": current_stats
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Simple sync status failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist()
+def get_item_stock_levels(item_code, company=None):
+    """Get stock levels for an item across all warehouses"""
+    try:
+        # Build company filter
+        company_condition = ""
+        params = [item_code]
+        
+        if company:
+            company_condition = "AND w.company = %s"
+            params.append(company)
+        
+        # Get stock data
+        stock_data = frappe.db.sql(f"""
+            SELECT 
+                b.warehouse,
+                w.company,
+                b.actual_qty,
+                b.reserved_qty,
+                b.ordered_qty,
+                b.planned_qty
+            FROM `tabBin` b
+            INNER JOIN `tabWarehouse` w ON w.name = b.warehouse
+            WHERE b.item_code = %s
+            {company_condition}
+            AND (b.actual_qty != 0 OR b.reserved_qty != 0 OR b.ordered_qty != 0 OR b.planned_qty != 0)
+            ORDER BY w.company, b.warehouse
+        """, params, as_dict=True)
+        
+        if not stock_data:
+            return {
+                "status": "error",
+                "message": f"No stock data found for {item_code}"
+            }
+        
+        return {
+            "status": "success",
+            "stock_data": stock_data
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Get item stock levels failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist()
+def check_forecast_coverage():
+    """Check forecast coverage across the system"""
+    try:
+        # Get total possible combinations
+        total_items = frappe.db.count("Item", {"is_stock_item": 1, "disabled": 0})
+        total_warehouses = frappe.db.count("Warehouse", {"disabled": 0})
+        total_possible_combinations = total_items * total_warehouses
+        
+        # Get existing forecasts
+        total_forecasts = frappe.db.count("AI Inventory Forecast")
+        
+        # Calculate coverage
+        coverage_percentage = (total_forecasts / total_possible_combinations * 100) if total_possible_combinations > 0 else 0
+        missing_forecasts = max(0, total_possible_combinations - total_forecasts)
+        
+        # Get company-wise breakdown
+        company_stats = frappe.db.sql("""
+            SELECT 
+                company,
+                COUNT(*) as forecast_count,
+                COUNT(DISTINCT item_code) as unique_items,
+                COUNT(DISTINCT warehouse) as unique_warehouses
+            FROM `tabAI Inventory Forecast`
+            WHERE company IS NOT NULL AND company != ''
+            GROUP BY company
+            ORDER BY forecast_count DESC
+        """, as_dict=True)
+        
+        return {
+            "status": "success",
+            "total_items": total_items,
+            "total_warehouses": total_warehouses,
+            "total_possible_combinations": total_possible_combinations,
+            "total_forecasts": total_forecasts,
+            "coverage_percentage": round(coverage_percentage, 1),
+            "missing_forecasts": missing_forecasts,
+            "company_stats": company_stats
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Check forecast coverage failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist()
+def fix_item_forecast_creation():
+    """Fix missing forecasts by creating them for all items that don't have them"""
+    try:
+        # Get coverage before
+        before_coverage = check_forecast_coverage()
+        
+        # Create missing forecasts
+        result = create_forecasts_for_all_existing_items()
+        
+        if result.get("status") == "success":
+            # Get coverage after
+            after_coverage = check_forecast_coverage()
+            
+            return {
+                "status": "success",
+                "message": result["message"],
+                "creation_details": {
+                    "total_items": result.get("total_items", 0),
+                    "total_warehouses": result.get("total_warehouses", 0),
+                    "forecasts_created": result.get("forecasts_created", 0),
+                    "company_summary": result.get("company_summary", "")
+                },
+                "before_coverage": before_coverage,
+                "after_coverage": after_coverage
+            }
+        else:
+            return result
+            
+    except Exception as e:
+        frappe.log_error(f"Fix item forecast creation failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist()
+def bulk_create_purchase_orders():
+    """Create purchase orders for all items with reorder alerts"""
+    try:
+        # Get items that need reordering and have suppliers
+        items_needing_po = frappe.db.sql("""
+            SELECT 
+                name,
+                item_code,
+                warehouse,
+                company,
+                supplier,
+                preferred_supplier,
+                suggested_qty,
+                reorder_level,
+                current_stock
+            FROM `tabAI Inventory Forecast`
+            WHERE reorder_alert = 1
+            AND suggested_qty > 0
+            AND (supplier IS NOT NULL OR preferred_supplier IS NOT NULL)
+            ORDER BY company, supplier
+            LIMIT 100
+        """, as_dict=True)
+        
+        if not items_needing_po:
+            return {
+                "status": "info",
+                "message": "No items found that need purchase orders",
+                "pos_created": 0,
+                "items_processed": 0
+            }
+        
+        # Group by company and supplier
+        po_groups = {}
+        for item in items_needing_po:
+            supplier = item.preferred_supplier or item.supplier
+            key = f"{item.company}_{supplier}"
+            
+            if key not in po_groups:
+                po_groups[key] = {
+                    "company": item.company,
+                    "supplier": supplier,
+                    "items": []
+                }
+            
+            po_groups[key]["items"].append(item)
+        
+        pos_created = 0
+        items_processed = 0
+        failed = 0
+        
+        # Create purchase orders for each group
+        for group_key, group_data in po_groups.items():
+            try:
+                # Create PO
+                po = frappe.get_doc({
+                    "doctype": "Purchase Order",
+                    "supplier": group_data["supplier"],
+                    "company": group_data["company"],
+                    "schedule_date": add_days(nowdate(), 14),
+                    "items": []
+                })
+                
+                # Add items to PO
+                for item in group_data["items"]:
+                    po.append("items", {
+                        "item_code": item.item_code,
+                        "qty": item.suggested_qty,
+                        "warehouse": item.warehouse,
+                        "schedule_date": add_days(nowdate(), 14)
+                    })
+                    items_processed += 1
+                
+                if po.items:
+                    po.insert()
+                    pos_created += 1
+                    
+                    # Update forecast records
+                    for item in group_data["items"]:
+                        frappe.db.set_value("AI Inventory Forecast", item.name, {
+                            "forecast_details": (item.get("forecast_details", "") + 
+                                               f"\n\nBulk PO {po.name} created on {nowdate()}")
+                        })
+                
+            except Exception as e:
+                frappe.log_error(f"Bulk PO creation failed for {group_key}: {str(e)}")
+                failed += 1
+                continue
+        
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"Bulk purchase order creation completed. Created {pos_created} POs for {items_processed} items.",
+            "pos_created": pos_created,
+            "items_processed": items_processed,
+            "failed": failed
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Bulk create purchase orders failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e),
+            "pos_created": 0,
+            "items_processed": 0
+        }
+
+@frappe.whitelist()
+def bulk_enable_auto_po(company=None, movement_types=None):
+    """Enable auto PO creation for selected items"""
+    try:
+        if not movement_types:
+            movement_types = ["Fast Moving", "Critical"]
+        
+        if isinstance(movement_types, str):
+            movement_types = json.loads(movement_types)
+        
+        # Build filters
+        filters = {
+            "movement_type": ["in", movement_types],
+            "reorder_alert": 1
+        }
+        
+        if company:
+            filters["company"] = company
+        
+        # Get eligible forecasts
+        eligible_forecasts = frappe.get_all("AI Inventory Forecast",
+            filters=filters,
+            fields=["name", "item_code", "warehouse", "company", "movement_type"]
+        )
+        
+        updated_count = 0
+        
+        for forecast in eligible_forecasts:
+            try:
+                # Check if forecast has auto_create_purchase_order field
+                frappe.db.set_value("AI Inventory Forecast", forecast.name, {
+                    "auto_create_purchase_order": 1
+                })
+                updated_count += 1
+                
+            except Exception as e:
+                frappe.log_error(f"Failed to enable auto PO for {forecast.name}: {str(e)}")
+                continue
+        
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"Enabled auto PO creation for {updated_count} items{' in ' + company if company else ''}",
+            "updated_count": updated_count,
+            "movement_types": movement_types,
+            "company": company
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Bulk enable auto PO failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+# ... original @frappe.whitelist() functions (run_forecast_background, create_auto_po_background, sync_ai_forecasts_now, etc.) ...

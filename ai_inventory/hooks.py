@@ -108,6 +108,32 @@ fixtures = [
         ]
     }
 ]
+# In ai_inventory/hooks.py, update the fixtures section:
+
+fixtures = [
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            [
+                "dt", "in", [
+                    "Supplier",
+                    "AI Inventory Forecast"
+                ]
+            ]
+        ]
+    },
+    {
+        "doctype": "Property Setter", 
+        "filters": [
+            [
+                "doc_type", "in", [
+                    "Supplier",
+                    "AI Inventory Forecast"
+                ]
+            ]
+        ]
+    }
+]
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ai_inventory/css/ai_inventory.css"
