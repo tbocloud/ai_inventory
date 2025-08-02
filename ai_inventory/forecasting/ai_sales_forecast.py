@@ -3,14 +3,26 @@
 # This module handles training ML models and generating sales forecasts
 
 import frappe
-import pandas as pd
-import numpy as np
 from datetime import datetime, timedelta
 from frappe.utils import nowdate, add_days, getdate
-import joblib
-import os
 import warnings
 warnings.filterwarnings('ignore')
+
+# Try to import ML libraries with fallback
+try:
+    import pandas as pd
+    import numpy as np
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+    frappe.log_error("pandas/numpy not available. Using fallback methods.", "AI Sales Forecasting")
+
+try:
+    import joblib
+    import os
+    JOBLIB_AVAILABLE = True
+except ImportError:
+    JOBLIB_AVAILABLE = False
 
 # Try to import ML libraries with fallback
 try:

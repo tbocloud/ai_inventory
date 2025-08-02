@@ -11,14 +11,41 @@ def before_install():
     """Install packages BEFORE app installation starts"""
     try:
         print("🚀 AI Inventory: Installing required packages before app installation...")
+        print("📋 This may take a few minutes...")
         
-        # Install packages before any DocType processing
-        install_required_packages()
+        # Try to install from requirements.txt first
+        try:
+            requirements_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), 
+                'requirements.txt'
+            )
+            if os.path.exists(requirements_path):
+                print(f"📦 Installing from requirements.txt: {requirements_path}")
+                subprocess.run([
+                    sys.executable, "-m", "pip", "install", "-r", requirements_path,
+                    "--upgrade", "--no-cache-dir", "--timeout", "300"
+                ], check=True, timeout=600)
+                print("✅ Requirements installed from requirements.txt")
+            else:
+                print("⚠️ requirements.txt not found, installing packages individually...")
+                # Fallback to individual package installation
+                install_required_packages()
+        except Exception as e:
+            print(f"⚠️ Requirements.txt installation failed: {str(e)}")
+            print("🔄 Falling back to individual package installation...")
+            install_required_packages()
         
-        print("✅ Pre-installation package setup completed!")
+        # Verify installation
+        verification_result = verify_and_reinstall_packages()
+        if verification_result:
+            print("✅ Pre-installation package setup completed successfully!")
+        else:
+            print("⚠️ Some packages may not be properly installed. The app will use fallback methods.")
         
     except Exception as e:
         print(f"❌ Pre-installation failed: {str(e)}")
+        print("📋 Manual installation required. Please run:")
+        print("   ./env/bin/pip install numpy>=1.21.0 pandas>=1.3.0 scikit-learn>=1.0.0")
         frappe.log_error(f"AI Inventory pre-installation failed: {str(e)}")
         # Don't raise exception here to allow installation to continue
 
@@ -50,7 +77,9 @@ def install_required_packages():
     packages = [
         'numpy>=1.21.0',
         'pandas>=1.3.0', 
-        'scikit-learn>=1.0.0'
+        'scikit-learn>=1.0.0',
+        'matplotlib>=3.3.0',
+        'scipy>=1.7.0'
     ]
     
     print("Installing required Python packages...")
@@ -62,6 +91,7 @@ def install_required_packages():
     
     failed_packages = []
     
+    # Install packages one by one with retries
     for package in packages:
         package_name = package.split('>=')[0].split('==')[0]  # Extract package name
         try:
@@ -72,10 +102,11 @@ def install_required_packages():
                 
             print(f"Installing {package}...")
             
-            # Use the same Python executable that's running Frappe
+            # Use pip install with more robust options
             result = subprocess.run([
-                sys.executable, "-m", "pip", "install", package, "--upgrade", "--quiet"
-            ], capture_output=True, text=True, check=True, timeout=300)
+                sys.executable, "-m", "pip", "install", package, 
+                "--upgrade", "--no-cache-dir", "--force-reinstall"
+            ], capture_output=True, text=True, check=True, timeout=600)
             
             print(f"✓ {package} installed successfully")
             
@@ -104,16 +135,20 @@ def install_required_packages():
         print(f"\n⚠️  Warning: Failed to install packages: {', '.join(failed_packages)}")
         print("Manual installation commands:")
         for pkg in failed_packages:
-            print(f"  ./env/bin/pip install {pkg} --upgrade")
+            print(f"  ./env/bin/pip install {pkg} --upgrade --no-cache-dir")
+        print("\nAlternatively, run from your bench directory:")
+        print("  ./env/bin/pip install -r apps/ai_inventory/requirements.txt")
 
 def verify_and_reinstall_packages():
     """Verify packages and reinstall if needed"""
     print("Verifying package installations...")
     
     packages_to_check = {
-        'numpy': 'np',
-        'pandas': 'pd', 
-        'scikit-learn': 'sklearn'
+        'numpy': 'numpy',
+        'pandas': 'pandas', 
+        'scikit-learn': 'sklearn',
+        'matplotlib': 'matplotlib',
+        'scipy': 'scipy'
     }
     
     missing_packages = []
@@ -123,12 +158,18 @@ def verify_and_reinstall_packages():
             if import_name == 'sklearn':
                 import sklearn
                 print(f"✓ {package} verified (version: {sklearn.__version__})")
-            elif import_name == 'np':
-                import numpy as np
-                print(f"✓ {package} verified (version: {np.__version__})")
-            elif import_name == 'pd':
-                import pandas as pd
-                print(f"✓ {package} verified (version: {pd.__version__})")
+            elif import_name == 'numpy':
+                import numpy
+                print(f"✓ {package} verified (version: {numpy.__version__})")
+            elif import_name == 'pandas':
+                import pandas
+                print(f"✓ {package} verified (version: {pandas.__version__})")
+            elif import_name == 'matplotlib':
+                import matplotlib
+                print(f"✓ {package} verified (version: {matplotlib.__version__})")
+            elif import_name == 'scipy':
+                import scipy
+                print(f"✓ {package} verified (version: {scipy.__version__})")
         except ImportError:
             print(f"✗ {package} not available")
             missing_packages.append(package)
@@ -142,11 +183,14 @@ def verify_and_reinstall_packages():
         for package in missing_packages:
             try:
                 subprocess.run([
-                    sys.executable, "-m", "pip", "install", package, "--upgrade", "--force-reinstall"
-                ], check=True, timeout=180)
+                    sys.executable, "-m", "pip", "install", package, 
+                    "--upgrade", "--force-reinstall", "--no-cache-dir"
+                ], check=True, timeout=300)
                 print(f"✓ {package} reinstalled")
             except Exception as e:
                 print(f"✗ Failed to reinstall {package}: {str(e)}")
+                
+    return len(missing_packages) == 0
 
 def is_package_installed(package_name):
     """Check if a Python package is installed and importable"""

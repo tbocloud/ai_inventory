@@ -46,6 +46,8 @@ An intelligent inventory and sales forecasting system for ERPNext that uses AI a
 
 ## 🔧 Installation
 
+⚠️ **IMPORTANT**: Install required Python packages BEFORE installing the app to avoid migration errors.
+
 ### Prerequisites
 
 - ERPNext v14+ or v15+
@@ -59,17 +61,33 @@ An intelligent inventory and sales forecasting system for ERPNext that uses AI a
 # Navigate to your ERPNext bench
 cd /path/to/your/bench
 
-# Install the app
+# STEP 1: Install required packages FIRST
+./env/bin/pip install numpy>=1.21.0 pandas>=1.3.0 scikit-learn>=1.0.0 matplotlib>=3.3.0 scipy>=1.7.0
+
+# STEP 2: Get the app
 bench get-app https://github.com/yourusername/ai_inventory.git
 
-# Install on your site
+# STEP 3: Install on your site
 bench --site your-site-name install-app ai_inventory
 
-# Migrate database
+# STEP 4: Migrate database
 bench --site your-site-name migrate
 
-# Restart services
+# STEP 5: Restart services
 bench restart
+
+# STEP 6: Clear cache
+bench --site your-site-name clear-cache
+```
+
+### Alternative: Use Installation Script
+
+```bash
+# Download and run the automated installation script
+cd /path/to/your/bench
+wget https://raw.githubusercontent.com/yourusername/ai_inventory/main/install.sh
+chmod +x install.sh
+./install.sh
 ```
 
 ### Manual Installation
@@ -569,9 +587,20 @@ def test_bulk_sync_performance():
 
 ## 🔍 Troubleshooting
 
-### Common Issues
+### Common Installation Issues
 
-#### 1. **Forecasts Not Creating**
+#### 1. "No module named 'pandas'" Error
+
+**Cause**: Required packages not installed before app installation.
+
+**Solution**:
+```bash
+# Install packages first, then retry migration
+./env/bin/pip install numpy pandas scikit-learn matplotlib scipy
+bench --site your-site-name migrate
+```
+
+#### 2. **Forecasts Not Creating**
 ```python
 # Check if items are stock items
 items_without_stock_flag = frappe.db.sql("""

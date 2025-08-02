@@ -5,16 +5,39 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import nowdate, flt, cint, add_days, getdate, now_datetime, now
-import pandas as pd
-import numpy as np
 from datetime import datetime, timedelta
-import joblib
-import os
 import warnings
 import random
 import time
 import uuid
 warnings.filterwarnings('ignore')
+
+# Try to import ML libraries with fallback
+try:
+    import pandas as pd
+    import numpy as np
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+    frappe.log_error("pandas/numpy not available. Using fallback methods.", "AI Sales Forecasting")
+
+try:
+    import joblib
+    import os
+    JOBLIB_AVAILABLE = True
+except ImportError:
+    JOBLIB_AVAILABLE = False
+
+# Try to import sklearn with fallback
+try:
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.linear_model import LinearRegression
+    from sklearn.preprocessing import LabelEncoder
+    from sklearn.metrics import mean_absolute_error, mean_squared_error
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    frappe.log_error("scikit-learn not available. Using simple forecasting.", "AI Sales Forecasting")
 
 # ============== UTILITY FUNCTIONS ==============
 
@@ -149,17 +172,6 @@ def safe_create_forecast(forecast_data):
         error_msg = f"Failed to create forecast: {str(e)}"
         frappe.log_error(error_msg)
         return {"status": "error", "message": error_msg}
-
-# Try to import ML libraries with fallback
-try:
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn.linear_model import LinearRegression
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.metrics import mean_absolute_error, mean_squared_error
-    SKLEARN_AVAILABLE = True
-except ImportError:
-    SKLEARN_AVAILABLE = False
-    frappe.log_error("scikit-learn not available. Using simple forecasting.", "AI Sales Forecasting")
 
 class AISalesForecast(Document):
     """AI Sales Forecast Document Class"""
@@ -310,7 +322,11 @@ class SalesForecastingEngine:
     def prepare_features(self, data):
         """Prepare features for machine learning"""
         if not data:
-            return pd.DataFrame()
+            return []
+            
+        if not PANDAS_AVAILABLE:
+            # Fallback without pandas
+            return data
             
         df = pd.DataFrame(data)
         if df.empty:
