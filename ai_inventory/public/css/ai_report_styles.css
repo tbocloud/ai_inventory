@@ -1,0 +1,435 @@
+/* AI Inventory Report Custom Styles */
+
+/* Critical priority blinking animation */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.5; }
+}
+
+/* Report widgets styling */
+.report-widgets {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.report-widgets .btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.report-widgets .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced table styling */
+.datatable .dt-cell--col-4,
+.datatable .dt-cell--col-5,
+.datatable .dt-cell--col-6 {
+    font-weight: 600;
+}
+
+/* Risk score styling */
+.risk-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 60px;
+}
+
+.risk-critical {
+    background-color: #dc3545;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.risk-high {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.risk-medium {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.risk-low {
+    background-color: #28a745;
+    color: white;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Confidence bar styling */
+.confidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.confidence-progress {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    height: 12px;
+    width: 80px;
+    overflow: hidden;
+    position: relative;
+}
+
+.confidence-fill {
+    height: 100%;
+    transition: width 0.5s ease;
+    border-radius: 10px;
+    position: relative;
+}
+
+.confidence-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Status badge styling */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-out-of-stock {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.status-low-stock {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+.status-normal {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.status-overstocked {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.3);
+}
+
+/* Priority level styling */
+.priority-critical {
+    color: #dc3545;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    animation: blink 1s infinite;
+}
+
+.priority-high {
+    color: #fd7e14;
+    font-weight: bold;
+}
+
+.priority-medium {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.priority-low {
+    color: #6c757d;
+}
+
+/* Trend indicators */
+.trend-increasing {
+    color: #28a745;
+    animation: bounce 1s infinite alternate;
+}
+
+.trend-decreasing {
+    color: #dc3545;
+    animation: bounce 1s infinite alternate;
+}
+
+.trend-stable {
+    color: #6c757d;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-3px); }
+}
+
+/* Real-time toggle styling */
+.realtime-toggle {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+}
+
+.realtime-toggle:hover {
+    background: linear-gradient(135deg, #bbdefb, #90caf9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.realtime-toggle input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 8px;
+}
+
+/* Dashboard widgets hover effects */
+.report-widgets .btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.report-widgets .btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.report-widgets .btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Insights dialog styling */
+.insights-container .insight-item {
+    border-left: 4px solid;
+    padding: 15px;
+    margin: 10px 0;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 0 8px 8px 0;
+    transition: all 0.3s ease;
+}
+
+.insights-container .insight-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-container .recommendation-item {
+    border: 1px solid;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendations-container .recommendation-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.recommendations-container .recommendation-item:hover::before {
+    left: 100%;
+}
+
+.recommendations-container .recommendation-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading animations */
+.loading-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Revenue potential styling */
+.revenue-high {
+    color: #28a745;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+}
+
+.revenue-medium {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.revenue-low {
+    color: #6c757d;
+}
+
+/* Demand pattern indicators */
+.pattern-growth {
+    color: #28a745;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.2));
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.pattern-decline {
+    color: #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.2));
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.pattern-volatile {
+    color: #fd7e14;
+    background: linear-gradient(135deg, rgba(253, 126, 20, 0.1), rgba(253, 126, 20, 0.2));
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.pattern-stable {
+    color: #6c757d;
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.1), rgba(108, 117, 125, 0.2));
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .report-widgets {
+        flex-direction: column;
+    }
+    
+    .report-widgets .btn {
+        margin: 5px 0;
+        width: 100%;
+    }
+    
+    .confidence-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .confidence-progress {
+        width: 100%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .report-widgets {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    }
+    
+    .insights-container .insight-item {
+        background: linear-gradient(135deg, #343a40, #495057);
+        color: #fff;
+    }
+    
+    .recommendations-container .recommendation-item {
+        background: linear-gradient(135deg, #343a40, #495057);
+        color: #fff;
+    }
+    
+    .realtime-toggle {
+        background: linear-gradient(135deg, #343a40, #495057);
+        border-color: #6c757d;
+        color: #fff;
+    }
+}
+
+/* Accessibility enhancements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus indicators */
+.report-widgets .btn:focus,
+.realtime-toggle input:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .risk-indicator,
+    .status-badge,
+    .pattern-growth,
+    .pattern-decline,
+    .pattern-volatile {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Print styles */
+@media print {
+    .report-widgets,
+    .realtime-toggle {
+        display: none;
+    }
+    
+    .datatable {
+        break-inside: avoid;
+    }
+    
+    .insights-container,
+    .recommendations-container {
+        break-inside: avoid;
+    }
+}

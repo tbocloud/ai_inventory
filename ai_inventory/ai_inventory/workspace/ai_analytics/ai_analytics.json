@@ -1,11 +1,19 @@
 {
  "charts": [
   {
+   "chart_name": "AI Sales Dashboard",
+   "label": "AI Sales Dashboard"
+  },
+  {
    "chart_name": "AI Inventory Dashboard",
    "label": "AI Inventory Dashboard"
+  },
+  {
+   "chart_name": "Ai Consolidated Predictive Insights",
+   "label": "Ai Consolidated Predictive Insights"
   }
  ],
- "content": "[{\"id\":\"X8cZOP3Yco\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AI Analytics</span>\",\"col\":12}},{\"id\":\"vxCZ3SpHVP\",\"type\":\"chart\",\"data\":{\"chart_name\":\"AI Inventory Dashboard\",\"col\":6}},{\"id\":\"cT08CKQPHK\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mk9aYdOVS1\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory\",\"col\":4}},{\"id\":\"KnDKQhD1dl\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"X8cZOP3Yco\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AI Analytics</span>\",\"col\":12}},{\"id\":\"Wv4YvCPDr7\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ai Consolidated Predictive Insights\",\"col\":12}},{\"id\":\"vxCZ3SpHVP\",\"type\":\"chart\",\"data\":{\"chart_name\":\"AI Inventory Dashboard\",\"col\":6}},{\"id\":\"RAV5eSqhsw\",\"type\":\"chart\",\"data\":{\"chart_name\":\"AI Sales Dashboard\",\"col\":6}},{\"id\":\"cT08CKQPHK\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mk9aYdOVS1\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory\",\"col\":4}},{\"id\":\"SMdkeP_-RE\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Sales\",\"col\":4}},{\"id\":\"KnDKQhD1dl\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Reports\",\"col\":4}}]",
  "creation": "2025-07-26 19:20:28.437822",
  "custom_blocks": [],
  "docstatus": 0,
@@ -21,8 +29,37 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "AI Sales",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Sales Dashboard",
+   "link_count": 0,
+   "link_to": "AI Sales Dashboard",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Sales Forecast",
+   "link_count": 0,
+   "link_to": "AI Sales Forecast",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "AI Inventory",
-   "link_count": 3,
+   "link_count": 2,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -50,17 +87,26 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "AI Forecast Sync Log",
-   "link_count": 0,
-   "link_to": "AI Forecast Sync Log",
+   "label": "AI Inventory Reports",
+   "link_count": 1,
    "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "AI Inventory Dashboard Report",
+   "link_count": 0,
+   "link_to": "AI Inventory Dashboard",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "AI Inventory Reports",
+   "label": "AI Reports",
    "link_count": 3,
    "link_type": "DocType",
    "onboard": 0,
@@ -79,9 +125,9 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Forecast Accuracy Analysis",
+   "label": "AI Sales Dashboard Report",
    "link_count": 0,
-   "link_to": "Forecast Accuracy Analysis",
+   "link_to": "AI Sales Dashboard",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -89,15 +135,15 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Stock Movement Prediction",
+   "label": "Ai Consolidated Predictive Insights",
    "link_count": 0,
-   "link_to": "Stock Movement Prediction",
+   "link_to": "Ai Consolidated Predictive Insights",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-07-28 11:31:11.179677",
+ "modified": "2025-08-02 12:22:44.116026",
  "modified_by": "Administrator",
  "module": "Ai Inventory",
  "name": "AI Analytics",

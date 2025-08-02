@@ -1,11 +1,11 @@
-# 🤖 AI Inventory Forecast for ERPNext
+# 🤖 AI Inventory & Sales Forecast for ERPNext
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![ERPNext](https://img.shields.io/badge/ERPNext-v14%2B-blue.svg)](https://github.com/frappe/erpnext)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-green.svg)](https://www.python.org/)
 [![Frappe](https://img.shields.io/badge/Frappe-v14%2B-red.svg)](https://github.com/frappe/frappe)
 
-An intelligent inventory forecasting system for ERPNext that uses AI algorithms to predict stock consumption patterns, generate reorder alerts, and optimize inventory management across multiple companies.
+An intelligent inventory and sales forecasting system for ERPNext that uses AI algorithms to predict stock consumption patterns, analyze sales trends, generate reorder alerts, and optimize inventory management across multiple companies with comprehensive sales analytics.
 
 ## 🌟 Features
 
@@ -14,6 +14,8 @@ An intelligent inventory forecasting system for ERPNext that uses AI algorithms 
 - **Movement Classification**: Automatically categorizes items as Fast Moving, Slow Moving, Non Moving, or Critical
 - **Confidence Scoring**: Provides prediction confidence levels (0-100%)
 - **Dynamic Forecasting**: Adjusts predictions based on recent consumption patterns
+- **Sales Forecasting**: Advanced predictive analytics for sales trends and customer demand patterns
+- **Revenue Prediction**: Forecasts future sales revenue with trend analysis and seasonal adjustments
 
 ### 🏢 **Multi-Company Support**
 - **Company-Specific Forecasting**: Separate forecasting logic for each company
@@ -32,6 +34,9 @@ An intelligent inventory forecasting system for ERPNext that uses AI algorithms 
 - **Forecast Accuracy Tracking**: Monitor and improve prediction performance
 - **Stock Movement Analysis**: Detailed insights into consumption patterns
 - **Company Performance Comparison**: Benchmark performance across companies
+- **AI Sales Dashboard**: Comprehensive sales analytics with predictive insights per item and customer
+- **Sales Trend Analysis**: Advanced metrics including growth rates, volatility, and seasonal patterns
+- **Customer Demand Forecasting**: Predict customer purchasing behavior and seasonal demands
 
 ### ⚡ **Performance & Scalability**
 - **Bulk Operations**: Process thousands of items efficiently
@@ -112,6 +117,9 @@ bench restart
    
    // Or create only for items with stock
    Click: Bulk Creation → Create for Items with Stock
+   
+   // Access AI Sales Dashboard
+   Navigate: Reports → AI Sales Dashboard
    ```
 
 ### 2. Multi-Company Configuration
@@ -138,6 +146,41 @@ result = forecast.run_ai_forecast()
 # Bulk forecast for a company
 sync_ai_forecasts_now(company="Your Company Name")
 ```
+
+### 4. AI Sales Dashboard
+
+The AI Sales Dashboard provides comprehensive sales analytics with predictive insights:
+
+```python
+# Access sales forecast data
+sales_data = frappe.call({
+    'method': 'ai_inventory.ai_inventory.report.ai_sales_dashboard.ai_sales_dashboard.execute',
+    'args': {
+        'filters': {
+            'company': 'Your Company',
+            'from_date': '2024-01-01',
+            'to_date': '2024-12-31'
+        }
+    }
+})
+
+# Key metrics available:
+# - Total Sales Amount
+# - Growth Rate (%)
+# - Sales Velocity (sales/day)
+# - Volatility Index
+# - Forecast Accuracy
+# - Customer Demand Trends
+```
+
+#### Sales Dashboard Features
+
+- **Predictive Sales Metrics**: Advanced algorithms analyze historical sales data
+- **Customer Analytics**: Per-customer sales trends and forecasting
+- **Item Performance**: Individual item sales analysis with growth indicators
+- **Seasonal Analysis**: Detect and predict seasonal sales patterns
+- **Revenue Forecasting**: Predict future revenue with confidence intervals
+- **Risk Assessment**: Identify items with high sales volatility
 
 ## 📖 Usage Guide
 
@@ -359,6 +402,33 @@ result = bulk_create_forecasts_for_existing_items(company="Company A")
 # }
 ```
 
+#### `execute_sales_dashboard(filters=None)`
+Generates AI Sales Dashboard with predictive analytics.
+
+```python
+result = execute_sales_dashboard({
+    "company": "Company A",
+    "from_date": "2024-01-01",
+    "to_date": "2024-12-31",
+    "customer": None,
+    "item_code": None
+})
+# Returns: {
+#     "columns": [...],
+#     "data": [
+#         {
+#             "item_code": "ITEM-001",
+#             "total_sales": 50000.0,
+#             "growth_rate": 15.5,
+#             "volatility_index": 0.23,
+#             "forecast_accuracy": 87.3,
+#             "customer_demand_trend": "Increasing"
+#         }
+#     ],
+#     "chart": {...}
+# }
+```
+
 ### Webhook Endpoints
 
 #### `/api/method/ai_inventory.sync_forecasts`
@@ -374,6 +444,22 @@ Content-Type: application/json
 #### `/api/method/ai_inventory.get_status`
 ```bash
 GET /api/method/ai_inventory.ai_inventory.doctype.ai_inventory_forecast.ai_inventory_forecast.get_simple_sync_status?company=Company%20A
+```
+
+#### `/api/method/ai_inventory.sales_dashboard`
+```bash
+POST /api/method/ai_inventory.ai_inventory.report.ai_sales_dashboard.ai_sales_dashboard.execute
+Content-Type: application/json
+
+{
+    "filters": {
+        "company": "Company A",
+        "from_date": "2024-01-01",
+        "to_date": "2024-12-31",
+        "customer": null,
+        "item_code": "ITEM-001"
+    }
+}
 ```
 
 ## ⚙️ Configuration
@@ -696,7 +782,10 @@ def complex_algorithm(data: List[Dict]) -> float:
 
 ## 📋 Roadmap
 
-### Version 2.1 (Q2 2024)
+### Version 2.1 (Q2 2024) ✅ Completed
+- [x] AI Sales Dashboard with Predictive Analytics
+- [x] Customer Demand Forecasting
+- [x] Sales Trend Analysis and Growth Metrics
 - [ ] Machine Learning Integration (TensorFlow/PyTorch)
 - [ ] Advanced Seasonality Detection
 - [ ] Multi-location Inventory Optimization

@@ -297,47 +297,71 @@ def apply_data_science_enhancements(data, filters):
         if not data:
             return data
         
+        # Check if required libraries are available
+        try:
+            import pandas as pd
+            import numpy as np
+        except ImportError as import_error:
+            frappe.log_error(f"Required libraries not available: {str(import_error)}")
+            # Apply basic enhancements without pandas
+            return apply_basic_enhancements(data)
+        
         # Convert to pandas DataFrame for easier manipulation
         df = pd.DataFrame(data)
         
+        # Ensure all required columns exist with defaults
+        df = ensure_required_columns(df)
+        
         # Calculate demand trend using recent consumption patterns
-        df['demand_trend'] = df.apply(lambda row: calculate_demand_trend(row), axis=1)
+        df['demand_trend'] = df.apply(lambda row: safe_calculate_demand_trend(row), axis=1)
         
         # Calculate seasonality score
-        df['seasonality_score'] = df.apply(lambda row: calculate_seasonality_score(row), axis=1)
+        df['seasonality_score'] = df.apply(lambda row: safe_calculate_seasonality_score(row), axis=1)
         
         # Calculate volatility index
-        df['volatility_index'] = df.apply(lambda row: calculate_volatility_index(row), axis=1)
+        df['volatility_index'] = df.apply(lambda row: safe_calculate_volatility_index(row), axis=1)
         
         # Calculate risk score (composite metric)
-        df['risk_score'] = df.apply(lambda row: calculate_risk_score(row), axis=1)
+        df['risk_score'] = df.apply(lambda row: safe_calculate_risk_score(row), axis=1)
         
         # Get ML price predictions
-        df['predicted_price'] = df.apply(lambda row: get_ml_price_prediction(row), axis=1)
+        df['predicted_price'] = df.apply(lambda row: safe_get_ml_price_prediction(row), axis=1)
         
         # Add inventory efficiency metrics
-        df = add_inventory_efficiency_metrics(df)
+        df = safe_add_inventory_efficiency_metrics(df)
         
         # Sort by risk score and reorder alerts
-        df = df.sort_values(['reorder_alert', 'risk_score', 'confidence_score'], 
-                           ascending=[False, False, False])
+        try:
+            df = df.sort_values(['reorder_alert', 'risk_score', 'confidence_score'], 
+                               ascending=[False, False, False])
+        except KeyError:
+            # If sorting columns don't exist, sort by available columns
+            available_cols = [col for col in ['reorder_alert', 'risk_score', 'confidence_score'] if col in df.columns]
+            if available_cols:
+                df = df.sort_values(available_cols, ascending=False)
         
         # Convert back to list of dictionaries
         enhanced_data = df.to_dict('records')
+        
+        # Clean up any NaN or inf values
+        enhanced_data = clean_data_values(enhanced_data)
         
         return enhanced_data
         
     except Exception as e:
         frappe.log_error(f"Data science enhancement failed: {str(e)}")
-        # Return original data if enhancement fails
-        return data
+        # Return basic enhanced data if pandas fails
+        return apply_basic_enhancements(data)
 
 def calculate_demand_trend(row):
     """Calculate demand trend based on historical consumption"""
     try:
-        item_code = row['item_code']
-        warehouse = row['warehouse']
-        company = row['company']
+        item_code = row.get('item_code')
+        warehouse = row.get('warehouse')
+        company = row.get('company')
+        
+        if not all([item_code, warehouse, company]):
+            return "Missing Data"
         
         # Get consumption data for last 90 days
         consumption_data = frappe.db.sql("""
@@ -360,9 +384,9 @@ def calculate_demand_trend(row):
         
         # Calculate trend using linear regression
         dates = [(getdate(d['date']) - getdate(consumption_data[0]['date'])).days for d in consumption_data]
-        consumptions = [d['daily_consumption'] for d in consumption_data]
+        consumptions = [flt(d['daily_consumption']) for d in consumption_data]
         
-        if len(dates) > 1:
+        if len(dates) > 1 and sum(consumptions) > 0:
             # Simple linear regression
             n = len(dates)
             sum_x = sum(dates)
@@ -370,26 +394,38 @@ def calculate_demand_trend(row):
             sum_xy = sum(x * y for x, y in zip(dates, consumptions))
             sum_x2 = sum(x * x for x in dates)
             
-            slope = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x)
-            
-            if slope > 0.1:
-                return "📈 Increasing"
-            elif slope < -0.1:
-                return "📉 Decreasing"
-            else:
-                return "➡️ Stable"
+            denominator = n * sum_x2 - sum_x * sum_x
+            if denominator != 0:
+                slope = (n * sum_xy - sum_x * sum_y) / denominator
+                
+                if slope > 0.1:
+                    return "📈 Increasing"
+                elif slope < -0.1:
+                    return "📉 Decreasing"
+                else:
+                    return "➡️ Stable"
         
-        return "Stable"
+        return "➡️ Stable"
         
     except Exception as e:
-        return "Unknown"
+        frappe.log_error(f"Demand trend calculation error for {item_code}: {str(e)}")
+        return "Error"
 
 def calculate_seasonality_score(row):
     """Calculate seasonality score based on consumption patterns"""
     try:
-        item_code = row['item_code']
-        warehouse = row['warehouse']
-        company = row['company']
+        # Check if numpy is available
+        try:
+            import numpy as np
+        except ImportError:
+            return 0
+            
+        item_code = row.get('item_code')
+        warehouse = row.get('warehouse')  
+        company = row.get('company')
+        
+        if not all([item_code, warehouse, company]):
+            return 0
         
         # Get monthly consumption for last 12 months
         monthly_data = frappe.db.sql("""
@@ -409,7 +445,7 @@ def calculate_seasonality_score(row):
         if len(monthly_data) < 6:
             return 0
         
-        consumptions = [d['monthly_consumption'] for d in monthly_data]
+        consumptions = [flt(d['monthly_consumption']) for d in monthly_data]
         mean_consumption = np.mean(consumptions)
         
         if mean_consumption == 0:
@@ -422,13 +458,14 @@ def calculate_seasonality_score(row):
         return round(seasonality_score, 1)
         
     except Exception as e:
+        frappe.log_error(f"Seasonality calculation error for {row.get('item_code', 'unknown')}: {str(e)}")
         return 0
 
 def calculate_volatility_index(row):
     """Calculate demand volatility index"""
     try:
-        predicted_consumption = row.get('predicted_consumption', 0)
-        confidence_score = row.get('confidence_score', 0)
+        predicted_consumption = flt(row.get('predicted_consumption', 0))
+        confidence_score = flt(row.get('confidence_score', 70))
         movement_type = row.get('movement_type', '')
         
         # Base volatility from confidence score
@@ -448,6 +485,7 @@ def calculate_volatility_index(row):
         return round(min(volatility_index, 2.0), 2)  # Cap at 2.0
         
     except Exception as e:
+        frappe.log_error(f"Volatility calculation error for {row.get('item_code', 'unknown')}: {str(e)}")
         return 1.0
 
 def calculate_risk_score(row):
@@ -456,8 +494,8 @@ def calculate_risk_score(row):
         risk_score = 0
         
         # Stock level risk (40% weight)
-        current_stock = row.get('current_stock', 0)
-        reorder_level = row.get('reorder_level', 0)
+        current_stock = flt(row.get('current_stock', 0))
+        reorder_level = flt(row.get('reorder_level', 0))
         
         if reorder_level > 0:
             stock_ratio = current_stock / reorder_level
@@ -472,7 +510,7 @@ def calculate_risk_score(row):
                 risk_score += 40
         
         # Confidence risk (25% weight)
-        confidence_score = row.get('confidence_score', 0)
+        confidence_score = flt(row.get('confidence_score', 70))
         confidence_risk = (100 - confidence_score) * 0.25
         risk_score += confidence_risk
         
@@ -487,14 +525,15 @@ def calculate_risk_score(row):
         risk_score += movement_risks.get(movement_type, 10)
         
         # Volatility risk (15% weight)
-        volatility_index = row.get('volatility_index', 1.0)
+        volatility_index = flt(row.get('volatility_index', 1.0))
         volatility_risk = min(volatility_index * 15, 15)
         risk_score += volatility_risk
         
         return round(min(risk_score, 100), 1)
         
     except Exception as e:
-        return 50  # Default medium risk
+        frappe.log_error(f"Risk score calculation error for {row.get('item_code', 'unknown')}: {str(e)}")
+        return 50.0  # Default medium risk
 
 def get_ml_price_prediction(row):
     """Get ML price prediction for the item"""
@@ -502,7 +541,7 @@ def get_ml_price_prediction(row):
         item_code = row.get('item_code')
         preferred_supplier = row.get('preferred_supplier')
         company = row.get('company')
-        suggested_qty = row.get('suggested_qty', 1)
+        suggested_qty = flt(row.get('suggested_qty', 1))
         
         if not preferred_supplier or not item_code:
             return 0
@@ -517,9 +556,11 @@ def get_ml_price_prediction(row):
             )
             
             if price_result.get('status') == 'success':
-                return price_result.get('predicted_price', 0)
+                return flt(price_result.get('predicted_price', 0))
         except ImportError:
             pass
+        except Exception as e:
+            frappe.log_error(f"ML analyzer failed for {item_code}: {str(e)}")
         
         # Fallback: Get last purchase price
         last_price = frappe.db.sql("""
@@ -534,9 +575,10 @@ def get_ml_price_prediction(row):
             LIMIT 1
         """, (item_code, preferred_supplier, company))
         
-        return last_price[0][0] if last_price else 0
+        return flt(last_price[0][0]) if last_price else 0
         
     except Exception as e:
+        frappe.log_error(f"Price prediction error for {row.get('item_code', 'unknown')}: {str(e)}")
         return 0
 
 def add_inventory_efficiency_metrics(df):
@@ -571,6 +613,208 @@ def add_inventory_efficiency_metrics(df):
     except Exception as e:
         frappe.log_error(f"Inventory efficiency metrics failed: {str(e)}")
         return df
+
+def apply_basic_enhancements(data):
+    """Apply basic enhancements when pandas is not available"""
+    try:
+        enhanced_data = []
+        
+        for row in data:
+            enhanced_row = row.copy()
+            
+            # Add default values for calculated fields
+            enhanced_row['demand_trend'] = "Data Processing..."
+            enhanced_row['seasonality_score'] = 0
+            enhanced_row['volatility_index'] = 1.0
+            enhanced_row['risk_score'] = 50.0  # Default medium risk
+            enhanced_row['predicted_price'] = 0
+            
+            # Try to calculate basic risk score
+            try:
+                enhanced_row['risk_score'] = calculate_basic_risk_score(row)
+            except:
+                enhanced_row['risk_score'] = 50.0
+            
+            # Try to get last purchase price
+            try:
+                enhanced_row['predicted_price'] = get_simple_last_price(row)
+            except:
+                enhanced_row['predicted_price'] = 0
+                
+            enhanced_data.append(enhanced_row)
+        
+        return enhanced_data
+        
+    except Exception as e:
+        frappe.log_error(f"Basic enhancement failed: {str(e)}")
+        return data
+
+def ensure_required_columns(df):
+    """Ensure all required columns exist with proper defaults"""
+    required_columns = {
+        'predicted_consumption': 0,
+        'reorder_level': 0,
+        'suggested_qty': 0,
+        'confidence_score': 70,
+        'current_stock': 0,
+        'movement_type': 'Unknown',
+        'preferred_supplier': None,
+        'item_code': '',
+        'warehouse': '',
+        'company': ''
+    }
+    
+    for col, default_val in required_columns.items():
+        if col not in df.columns:
+            df[col] = default_val
+        else:
+            # Fill NaN values with defaults
+            df[col] = df[col].fillna(default_val)
+    
+    return df
+
+def safe_calculate_demand_trend(row):
+    """Safe wrapper for demand trend calculation"""
+    try:
+        return calculate_demand_trend(row)
+    except Exception as e:
+        frappe.log_error(f"Demand trend calculation failed for {row.get('item_code', 'unknown')}: {str(e)}")
+        return "Calculation Error"
+
+def safe_calculate_seasonality_score(row):
+    """Safe wrapper for seasonality score calculation"""
+    try:
+        return calculate_seasonality_score(row)
+    except Exception as e:
+        frappe.log_error(f"Seasonality calculation failed for {row.get('item_code', 'unknown')}: {str(e)}")
+        return 0
+
+def safe_calculate_volatility_index(row):
+    """Safe wrapper for volatility index calculation"""
+    try:
+        return calculate_volatility_index(row)
+    except Exception as e:
+        frappe.log_error(f"Volatility calculation failed for {row.get('item_code', 'unknown')}: {str(e)}")
+        return 1.0
+
+def safe_calculate_risk_score(row):
+    """Safe wrapper for risk score calculation"""
+    try:
+        return calculate_risk_score(row)
+    except Exception as e:
+        frappe.log_error(f"Risk score calculation failed for {row.get('item_code', 'unknown')}: {str(e)}")
+        return 50.0
+
+def safe_get_ml_price_prediction(row):
+    """Safe wrapper for ML price prediction"""
+    try:
+        return get_ml_price_prediction(row)
+    except Exception as e:
+        frappe.log_error(f"Price prediction failed for {row.get('item_code', 'unknown')}: {str(e)}")
+        return 0
+
+def safe_add_inventory_efficiency_metrics(df):
+    """Safe wrapper for inventory efficiency metrics"""
+    try:
+        return add_inventory_efficiency_metrics(df)
+    except Exception as e:
+        frappe.log_error(f"Inventory efficiency metrics failed: {str(e)}")
+        return df
+
+def clean_data_values(data):
+    """Clean NaN and infinite values from data"""
+    try:
+        import math
+        
+        cleaned_data = []
+        for row in data:
+            cleaned_row = {}
+            for key, value in row.items():
+                if isinstance(value, float):
+                    if math.isnan(value) or math.isinf(value):
+                        # Set appropriate defaults for different field types
+                        if 'score' in key or 'index' in key:
+                            cleaned_row[key] = 0
+                        elif 'price' in key or 'consumption' in key or 'qty' in key:
+                            cleaned_row[key] = 0
+                        else:
+                            cleaned_row[key] = 0
+                    else:
+                        cleaned_row[key] = value
+                else:
+                    cleaned_row[key] = value
+            cleaned_data.append(cleaned_row)
+        
+        return cleaned_data
+        
+    except Exception as e:
+        frappe.log_error(f"Data cleaning failed: {str(e)}")
+        return data
+
+def calculate_basic_risk_score(row):
+    """Calculate basic risk score without complex calculations"""
+    try:
+        risk_score = 0
+        
+        # Stock level risk
+        current_stock = flt(row.get('current_stock', 0))
+        reorder_level = flt(row.get('reorder_level', 0))
+        
+        if reorder_level > 0:
+            stock_ratio = current_stock / reorder_level
+            if stock_ratio <= 0.5:
+                risk_score += 40
+            elif stock_ratio <= 1.0:
+                risk_score += 25
+            elif stock_ratio <= 1.5:
+                risk_score += 10
+        
+        # Confidence risk
+        confidence_score = flt(row.get('confidence_score', 70))
+        confidence_risk = (100 - confidence_score) * 0.25
+        risk_score += confidence_risk
+        
+        # Movement type risk
+        movement_type = row.get('movement_type', '')
+        movement_risks = {
+            'Critical': 20,
+            'Fast Moving': 15,
+            'Slow Moving': 5,
+            'Non Moving': 2
+        }
+        risk_score += movement_risks.get(movement_type, 10)
+        
+        return round(min(risk_score, 100), 1)
+        
+    except Exception:
+        return 50.0
+
+def get_simple_last_price(row):
+    """Get simple last purchase price without ML analyzer"""
+    try:
+        item_code = row.get('item_code')
+        preferred_supplier = row.get('preferred_supplier')
+        company = row.get('company')
+        
+        if not preferred_supplier or not item_code:
+            return 0
+        
+        last_price = frappe.db.sql("""
+            SELECT poi.rate
+            FROM `tabPurchase Order Item` poi
+            INNER JOIN `tabPurchase Order` po ON po.name = poi.parent
+            WHERE poi.item_code = %s 
+            AND po.supplier = %s
+            AND po.company = %s
+            AND po.docstatus = 1
+            ORDER BY po.transaction_date DESC
+            LIMIT 1
+        """, (item_code, preferred_supplier, company))
+        
+        return flt(last_price[0][0]) if last_price else 0
+        
+    except Exception:
+        return 0
 
 def get_advanced_chart_data(filters):
     """Advanced chart data with multiple visualizations"""

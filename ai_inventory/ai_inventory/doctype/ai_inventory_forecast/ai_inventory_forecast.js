@@ -1,6 +1,107 @@
 // ai_inventory/ai_inventory/doctype/ai_inventory_forecast/ai_inventory_forecast.js
 // FIXED VERSION - Persistent status banner and stock dialog
 
+// CONSOLIDATED List view customization - Single configuration to prevent overlaps
+frappe.listview_settings['AI Inventory Forecast'] = {
+    add_fields: ['company', 'current_stock', 'reorder_level', 'confidence_score', 'movement_type', 'last_forecast_date', 'reorder_alert', 'predicted_consumption'],
+    hide_name_column: true,
+    
+    get_indicator: function(doc) {
+        if (doc.reorder_alert) {
+            return [__("🚨 Reorder Alert"), "red", "reorder_alert,=,1"];
+        } else if (doc.movement_type === "Critical") {
+            return [__("🔴 Critical"), "purple", "movement_type,=,Critical"];
+        } else if (doc.movement_type === "Fast Moving") {
+            return [__("🟢 Fast Moving"), "green", "movement_type,=,Fast Moving"];
+        } else if (doc.movement_type === "Slow Moving") {
+            return [__("� Slow Moving"), "orange", "movement_type,=,Slow Moving"];
+        } else if (doc.movement_type === "Non Moving") {
+            return [__("⚪ Non Moving"), "red", "movement_type,=,Non Moving"];
+        } else if (doc.confidence_score >= 80) {
+            return [__("High Confidence"), "blue", "confidence_score,>=,80"];
+        } else if (doc.confidence_score >= 60) {
+            return [__("Medium Confidence"), "orange", "confidence_score,>=,60"];
+        } else if (doc.confidence_score < 60 && doc.confidence_score > 0) {
+            return [__("Low Confidence"), "red", "confidence_score,<,60"];
+        } else {
+            return [__("No Forecast"), "gray", "confidence_score,=,0"];
+        }
+    },
+
+    onload: function(listview) {
+        // Add status banner styles
+        add_ai_forecast_styles();
+        
+        // Add status banner after short delay
+        setTimeout(() => {
+            add_ai_forecast_status_banner(listview);
+        }, 500);
+        
+        // Add menu items
+        listview.page.add_menu_item(__("🔄 Sync All"), function() {
+            sync_all_forecasts_from_list();
+        });
+    },
+
+    refresh: function(listview) {
+        // Ensure banner exists and refresh status
+        setTimeout(() => {
+            if (!$('#ai-forecast-status-banner').length) {
+                add_ai_forecast_status_banner(listview);
+            }
+            refresh_ai_status(listview);
+        }, 300);
+    },
+    
+    formatters: {
+        movement_type: function(value) {
+            const colors = {
+                'Fast Moving': 'green',
+                'Slow Moving': 'orange',
+                'Non Moving': 'red',
+                'Critical': 'purple'
+            };
+            const color = colors[value] || 'gray';
+            return `<span style="color: ${color}; font-weight: bold;">${value || '-'}</span>`;
+        },
+        
+        company: function(value) {
+            if (value) {
+                return `<span style="background: #007bff; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold;">${value}</span>`;
+            }
+            return '<span style="color: red; font-size: 10px;">No Company</span>';
+        },
+        
+        confidence_score: function(value) {
+            if (value >= 80) {
+                return `<span style="color: green; font-weight: bold;">${value}%</span>`;
+            } else if (value >= 60) {
+                return `<span style="color: orange; font-weight: bold;">${value}%</span>`;
+            } else if (value > 0) {
+                return `<span style="color: red; font-weight: bold;">${value}%</span>`;
+            } else {
+                return `<span style="color: gray;">-</span>`;
+            }
+        },
+        
+        current_stock: function(value) {
+            if (value > 0) {
+                return `<span style="color: blue; font-weight: bold;">${value}</span>`;
+            } else {
+                return `<span style="color: red; font-weight: bold;">0</span>`;
+            }
+        },
+        
+        predicted_consumption: function(value) {
+            if (value > 0) {
+                return `<span style="color: green; font-weight: bold;">${value}</span>`;
+            } else {
+                return `<span style="color: gray;">-</span>`;
+            }
+        }
+    }
+};
+
 frappe.ui.form.on('AI Inventory Forecast', {
     refresh: function(frm) {
         // Add custom buttons
@@ -1046,7 +1147,7 @@ function display_stock_levels_in_dialog(dialog, stock_data, frm) {
 }
 
 // =============================================================================
-// LIST VIEW SETTINGS - ADD THIS TO THE END OF ai_inventory_forecast.js
+// HELPER FUNCTIONS FOR LIST VIEW STATUS BANNER - CONSOLIDATED
 // =============================================================================
 
 // Helper function: Add CSS styles
@@ -1073,6 +1174,10 @@ function add_ai_forecast_styles() {
                     position: sticky;
                     top: 60px;
                     z-index: 999;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+                #ai-forecast-status-banner .btn {
+                    border: 1px solid rgba(255,255,255,0.3);
                 }
             `)
             .appendTo('head');
@@ -1081,6 +1186,7 @@ function add_ai_forecast_styles() {
 
 // Helper function: Add status banner
 function add_ai_forecast_status_banner(listview) {
+    // Remove existing banner to prevent duplicates
     $('#ai-forecast-status-banner').remove();
     
     let banner = $(`
@@ -1104,12 +1210,14 @@ function add_ai_forecast_status_banner(listview) {
         </div>
     `);
     
+    // Insert banner in the right location
     if (listview.page.$title_area?.length) {
         banner.insertAfter(listview.page.$title_area);
     } else {
         banner.prependTo(listview.page.main);
     }
     
+    // Load status after banner is added
     setTimeout(() => refresh_ai_status(listview), 500);
 }
 
@@ -1182,82 +1290,3 @@ function sync_all_forecasts_from_list() {
         }
     );
 }
-
-// MAIN LIST VIEW SETTINGS
-frappe.listview_settings['AI Inventory Forecast'] = {
-    add_fields: ['company', 'current_stock', 'reorder_level', 'confidence_score', 'movement_type', 'last_forecast_date', 'reorder_alert'],
-    hide_name_column: true,
-
-    onload: function(listview) {
-        add_ai_forecast_styles();
-        setTimeout(() => {
-            add_ai_forecast_status_banner(listview);
-        }, 500);
-        
-        listview.page.add_menu_item(__("🔄 Sync All"), function() {
-            sync_all_forecasts_from_list();
-        });
-    },
-
-    refresh: function(listview) {
-        setTimeout(() => {
-            if (!$('#ai-forecast-status-banner').length) {
-                add_ai_forecast_status_banner(listview);
-            }
-            refresh_ai_status(listview);
-        }, 300);
-    },
-
-    formatters: {
-        movement_type: function(value) {
-            if (value === 'Fast Moving') {
-                return '<span style="color: green; font-weight: bold;">Fast Moving</span>';
-            } else if (value === 'Slow Moving') {
-                return '<span style="color: orange; font-weight: bold;">Slow Moving</span>';
-            } else if (value === 'Non Moving') {
-                return '<span style="color: red; font-weight: bold;">Non Moving</span>';
-            } else if (value === 'Critical') {
-                return '<span style="color: purple; font-weight: bold;">Critical</span>';
-            } else {
-                return '<span style="color: grey;">Unknown</span>';
-            }
-        },
-        
-        company: function(value) {
-            if (value) {
-                return '<span style="background: #007bff; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px;">' + value + '</span>';
-            }
-            return '<span style="color: red;">No Company</span>';
-        },
-        
-        confidence_score: function(value) {
-            if (value > 80) {
-                return '<span style="color: green; font-weight: bold;">' + value + '%</span>';
-            } else if (value > 60) {
-                return '<span style="color: orange; font-weight: bold;">' + value + '%</span>';
-            } else if (value > 0) {
-                return '<span style="color: red; font-weight: bold;">' + value + '%</span>';
-            }
-            return '<span style="color: grey;">-</span>';
-        }
-    }
-};
-
-// INDICATOR FUNCTION
-frappe.get_indicator = function(doc, doctype) {
-    if (doctype === 'AI Inventory Forecast') {
-        if (doc.reorder_alert) {
-            return [__("🚨 REORDER ALERT"), "red", "reorder_alert,=,1"];
-        } else if (doc.movement_type === "Critical") {
-            return [__("🔴 Critical"), "purple", "movement_type,=,Critical"];
-        } else if (doc.movement_type === "Fast Moving") {
-            return [__("🟢 Fast Moving"), "green", "movement_type,=,Fast Moving"];
-        } else if (doc.movement_type === "Slow Moving") {
-            return [__("🟡 Slow Moving"), "orange", "movement_type,=,Slow Moving"];
-        } else if (doc.movement_type === "Non Moving") {
-            return [__("🔴 Non Moving"), "red", "movement_type,=,Non Moving"];
-        } else {
-            return [__("⚪ Unknown"), "grey", "movement_type,=,"];
-        }
-    }
-};

@@ -1,0 +1,35 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2025-08-01 12:54:43.994187",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-08-01 12:54:43.994187",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "Ai Consolidated Predictive Insights",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "AI Sales Forecast",
+ "reference_report": "AI Inventory Forecast",
+ "report_name": "Ai Consolidated Predictive Insights",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Sales User"
+  }
+ ],
+ "timeout": 0
+}

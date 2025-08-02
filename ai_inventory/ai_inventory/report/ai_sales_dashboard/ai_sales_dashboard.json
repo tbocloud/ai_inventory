@@ -1,0 +1,115 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2025-07-31 10:50:07.793957",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 0
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 0
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 0
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 0
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory",
+   "reqd": 0
+  },
+  {
+   "fieldname": "sales_trend",
+   "fieldtype": "Select",
+   "label": "Sales Trend",
+   "options": "\nIncreasing\nDecreasing\nStable\nVolatile\nSeasonal",
+   "reqd": 0
+  },
+  {
+   "fieldname": "movement_type",
+   "fieldtype": "Select",
+   "label": "Movement Type",
+   "options": "\nFast Moving\nSlow Moving\nNon Moving\nCritical",
+   "reqd": 0
+  },
+  {
+   "fieldname": "sales_alert",
+   "fieldtype": "Check",
+   "label": "Show Sales Alerts Only",
+   "reqd": 0
+  },
+  {
+   "fieldname": "low_confidence",
+   "fieldtype": "Check",
+   "label": "Low Confidence Only (<70%)",
+   "reqd": 0
+  },
+  {
+   "fieldname": "high_opportunity",
+   "fieldtype": "Check",
+   "label": "High Opportunity Items",
+   "reqd": 0
+  },
+  {
+   "fieldname": "fast_moving_only",
+   "fieldtype": "Check",
+   "label": "Fast Moving Only",
+   "reqd": 0
+  },
+  {
+   "fieldname": "critical_items_only",
+   "fieldtype": "Check",
+   "label": "Critical Items Only",
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-07-31 10:50:07.793957",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Sales Dashboard",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "AI Sales Forecast",
+ "report_name": "AI Sales Dashboard",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "All"
+  }
+ ],
+ "timeout": 300
+}

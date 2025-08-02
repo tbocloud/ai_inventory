@@ -1,0 +1,42 @@
+{
+ "based_on": "",
+ "chart_name": "Ai Consolidated Predictive Insights",
+ "chart_type": "Report",
+ "creation": "2025-08-01 16:45:35.689567",
+ "currency": "",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "AI Inventory Forecast",
+ "dynamic_filters_json": "{}",
+ "filters_json": "{\"from_date\":\"2025-02-02\",\"to_date\":\"2025-08-31\",\"confidence_threshold\":60,\"prediction_horizon\":30,\"high_priority_only\":0,\"critical_items_only\":0,\"growth_opportunities\":0,\"stock_alerts_only\":0,\"enable_ml_clustering\":1,\"show_advanced_metrics\":1}",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2025-08-01 16:45:38.036420",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "Ai Consolidated Predictive Insights",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "report_name": "Ai Consolidated Predictive Insights",
+ "roles": [
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  }
+ ],
+ "show_values_over_chart": 0,
+ "source": "",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 1,
+ "value_based_on": "",
+ "x_field": "",
+ "y_axis": []
+}

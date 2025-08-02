@@ -946,7 +946,7 @@ def create_forecasts_for_all_existing_items():
                             "warehouse": warehouse.name
                         }, "actual_qty") or 0
                         
-                        # Create forecast
+                        # Create forecast with valid movement_type
                         forecast = frappe.get_doc({
                             "doctype": "AI Inventory Forecast",
                             "item_code": item.name,
@@ -956,7 +956,7 @@ def create_forecasts_for_all_existing_items():
                             "lead_time_days": 14,
                             "current_stock": current_stock,
                             "predicted_consumption": 0,
-                            "movement_type": "New Item",
+                            "movement_type": "Non Moving",  # Use valid value instead of "New Item"
                             "confidence_score": 0,
                             "forecast_details": f"Auto-created forecast for existing item {item.name}"
                         })
@@ -974,7 +974,7 @@ def create_forecasts_for_all_existing_items():
                         frappe.logger().info(f"Processed {total_processed} combinations, created {total_created} forecasts")
                         
                 except Exception as e:
-                    frappe.log_error(f"Failed to create forecast for {item.name} in {warehouse.name}: {str(e)}")
+                    frappe.log_error(f"Forecast creation failed: {item.name[:20]} in {warehouse.name[:20]}")
                     continue
         
         frappe.db.commit()
@@ -993,7 +993,7 @@ def create_forecasts_for_all_existing_items():
         }
         
     except Exception as e:
-        error_msg = f"Failed to create forecasts for existing items: {str(e)}"
+        error_msg = f"Forecast creation failed: {str(e)[:100]}"
         frappe.log_error(error_msg)
         return {
             "status": "error",
@@ -1249,7 +1249,7 @@ def fix_item_forecast_creation():
             return result
             
     except Exception as e:
-        frappe.log_error(f"Fix item forecast creation failed: {str(e)}")
+        frappe.log_error(f"Fix forecast creation error: {str(e)[:50]}")
         return {
             "status": "error",
             "message": str(e)

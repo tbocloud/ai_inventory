@@ -37,7 +37,11 @@ doc_events = {
         "on_submit": "ai_inventory.hooks_handlers.on_stock_entry_submit_safe"
     },
     "Sales Order": {
-        "on_submit": "ai_inventory.hooks_handlers.on_sales_order_submit_safe"
+        "on_submit": "ai_inventory.forecasting.triggers.on_sales_order_submit"
+    },
+    "Sales Invoice": {
+        "on_submit": "ai_inventory.forecasting.triggers.on_sales_invoice_submit",
+        "on_cancel": "ai_inventory.forecasting.triggers.on_sales_invoice_cancel"
     }
 }
 
@@ -88,6 +92,7 @@ fixtures = [
         "filters": [
             [
                 "dt", "in", [
+                    "Purchase Order",
                     "Purchase Order Item",
                     "Supplier", 
                     "AI Inventory Forecast"
@@ -100,33 +105,8 @@ fixtures = [
         "filters": [
             [
                 "doc_type", "in", [
+                    "Purchase Order",
                     "Purchase Order Item",
-                    "Supplier",
-                    "AI Inventory Forecast"
-                ]
-            ]
-        ]
-    }
-]
-# In ai_inventory/hooks.py, update the fixtures section:
-
-fixtures = [
-    {
-        "doctype": "Custom Field",
-        "filters": [
-            [
-                "dt", "in", [
-                    "Supplier",
-                    "AI Inventory Forecast"
-                ]
-            ]
-        ]
-    },
-    {
-        "doctype": "Property Setter", 
-        "filters": [
-            [
-                "doc_type", "in", [
                     "Supplier",
                     "AI Inventory Forecast"
                 ]

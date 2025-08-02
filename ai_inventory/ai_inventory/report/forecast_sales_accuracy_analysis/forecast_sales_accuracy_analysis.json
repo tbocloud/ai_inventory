@@ -1,0 +1,140 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2025-07-31 10:50:39.039164",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "default": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "default": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory",
+   "default": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "default": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "default": "Today",
+   "reqd": 0
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date", 
+   "label": "To Date",
+   "default": "Today",
+   "reqd": 0
+  },
+  {
+   "fieldname": "analysis_period",
+   "fieldtype": "Select",
+   "label": "Analysis Period (Days)",
+   "options": "7\n15\n30\n60\n90",
+   "default": "30",
+   "reqd": 0
+  },
+  {
+   "fieldname": "accuracy_threshold",
+   "fieldtype": "Percent",
+   "label": "Accuracy Threshold (%)",
+   "default": 80,
+   "reqd": 0
+  },
+  {
+   "fieldname": "sales_trend",
+   "fieldtype": "MultiSelect",
+   "label": "Sales Trend",
+   "options": "Increasing\nDecreasing\nStable\nVolatile\nNew Product",
+   "default": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "movement_type",
+   "fieldtype": "MultiSelect", 
+   "label": "Movement Type",
+   "options": "Fast Moving\nSlow Moving\nNon Moving\nCritical",
+   "default": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "min_confidence",
+   "fieldtype": "Percent",
+   "label": "Minimum Confidence (%)",
+   "default": 0,
+   "reqd": 0
+  },
+  {
+   "fieldname": "accuracy_category",
+   "fieldtype": "MultiSelect",
+   "label": "Accuracy Category",
+   "options": "Excellent\nGood\nFair\nPoor\nVery Poor",
+   "default": "",
+   "reqd": 0
+  },
+  {
+   "fieldname": "high_impact_only",
+   "fieldtype": "Check",
+   "label": "High Revenue Impact Only",
+   "default": 0,
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-07-31 10:50:48.043535",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "Forecast Sales Accuracy Analysis",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "AI Sales Forecast",
+ "report_name": "Forecast Sales Accuracy Analysis",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "All"
+  }
+ ],
+ "timeout": 300
+}

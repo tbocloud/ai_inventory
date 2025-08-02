@@ -37,13 +37,47 @@
   "preferred_supplier",
   "amended_from"
  ],
+ "grid_page_length": 50,
+ "image_field": "",
+ "index_web_pages_for_search": 1,
+ "indicators": [
+  {
+   "condition": "confidence_score >= 80",
+   "color": "green",
+   "text": "High Confidence"
+  },
+  {
+   "condition": "confidence_score >= 60 and confidence_score < 80",
+   "color": "orange",
+   "text": "Medium Confidence"
+  },
+  {
+   "condition": "confidence_score < 60",
+   "color": "red", 
+   "text": "Low Confidence"
+  },
+  {
+   "condition": "reorder_alert == 1",
+   "color": "red",
+   "text": "Reorder Alert"
+  },
+  {
+   "condition": "movement_type == 'Critical'",
+   "color": "red",
+   "text": "Critical"
+  },
+  {
+   "condition": "movement_type == 'Fast Moving'",
+   "color": "green",
+   "text": "Fast Moving"
+  }
+ ],
  "fields": [
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "AIF-.YYYY.-",
-   "reqd": 1
+   "options": "AIF-.YYYY.-"
   },
   {
    "fieldname": "item_code",
@@ -230,8 +264,6 @@
    "search_index": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2025-07-28 07:41:06.963311",
  "modified_by": "Administrator",
@@ -270,5 +302,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "item_code",
  "track_changes": 1
 }

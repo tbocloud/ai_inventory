@@ -171,32 +171,23 @@ def create_custom_fields():
         # Set flag to indicate we're in installation
         frappe.flags.in_install = True
         
-        # Custom fields for AI Inventory Forecast
+        # Custom fields for AI Inventory Forecast (excluding fields already in doctype)
         ai_forecast_fields = [
-            {
-                "fieldname": "preferred_supplier",
-                "label": "Preferred Supplier",
-                "fieldtype": "Link",
-                "options": "Supplier",
-                "insert_after": "supplier",
-                "read_only": 1,
-                "description": "ML-analyzed preferred supplier based on purchase history"
-            },
             {
                 "fieldname": "auto_create_purchase_order",
                 "label": "Auto Create Purchase Order",
                 "fieldtype": "Check",
                 "insert_after": "reorder_alert",
                 "default": 0,
-                "description": "Automatically create purchase order when reorder alert is triggered"
+                "description": "Auto-create PO when reorder alert triggers"
             },
             {
-                "fieldname": "analysis_method",
-                "label": "Analysis Method",
-                "fieldtype": "Data",
-                "insert_after": "confidence_score",
-                "read_only": 1,
-                "description": "Method used for forecast analysis"
+                "fieldname": "preferred_supplier",
+                "label": "Preferred Supplier",
+                "fieldtype": "Link",
+                "options": "Supplier",
+                "insert_after": "supplier",
+                "description": "AI-recommended preferred supplier for this item"
             }
         ]
         
@@ -204,7 +195,7 @@ def create_custom_fields():
         for field in ai_forecast_fields:
             create_single_custom_field("AI Inventory Forecast", field)
         
-        # Custom fields for Supplier
+        # Custom fields for Supplier (shortened descriptions)
         supplier_fields = [
             {
                 "fieldname": "supplier_segment",
@@ -213,7 +204,7 @@ def create_custom_fields():
                 "options": "\nStrategic\nPreferred\nApproved\nCaution\nCritical",
                 "insert_after": "supplier_group",
                 "read_only": 1,
-                "description": "ML-determined supplier classification"
+                "description": "ML supplier classification"
             },
             {
                 "fieldname": "risk_score",
@@ -221,7 +212,7 @@ def create_custom_fields():
                 "fieldtype": "Int",
                 "insert_after": "supplier_segment",
                 "read_only": 1,
-                "description": "Credit risk score calculated by ML (0-100, lower is better)"
+                "description": "Risk score (0-100)"
             },
             {
                 "fieldname": "deal_score",
@@ -229,7 +220,7 @@ def create_custom_fields():
                 "fieldtype": "Int",
                 "insert_after": "risk_score",
                 "read_only": 1,
-                "description": "Deal quality score calculated by ML (0-100, higher is better)"
+                "description": "Deal score (0-100)"
             },
             {
                 "fieldname": "supplier_lifetime_value",
@@ -237,7 +228,7 @@ def create_custom_fields():
                 "fieldtype": "Currency",
                 "insert_after": "deal_score",
                 "read_only": 1,
-                "description": "ML-calculated long-term value of supplier relationship"
+                "description": "Supplier value"
             },
             {
                 "fieldname": "last_ml_update",
@@ -245,13 +236,82 @@ def create_custom_fields():
                 "fieldtype": "Datetime",
                 "insert_after": "supplier_lifetime_value",
                 "read_only": 1,
-                "description": "Timestamp of most recent ML score calculation"
+                "description": "Last update"
             }
         ]
         
         # Create Supplier fields
         for field in supplier_fields:
             create_single_custom_field("Supplier", field)
+        
+        # Custom fields for Customer (AI Analytics)
+        customer_fields = [
+            {
+                "fieldname": "churn_probability",
+                "label": "Churn Probability (%)",
+                "fieldtype": "Float",
+                "insert_after": "customer_group",
+                "read_only": 1,
+                "precision": "2",
+                "in_list_view": 1,
+                "description": "AI-calculated probability of customer churn"
+            },
+            {
+                "fieldname": "customer_lifetime_value",
+                "label": "Customer Lifetime Value", 
+                "fieldtype": "Currency",
+                "insert_after": "churn_probability",
+                "read_only": 1,
+                "description": "AI-calculated customer lifetime value"
+            },
+            {
+                "fieldname": "last_analytics_update",
+                "label": "Last Analytics Update",
+                "fieldtype": "Datetime",
+                "insert_after": "customer_lifetime_value",
+                "read_only": 1,
+                "description": "Last time AI analytics were updated"
+            }
+        ]
+        
+        # Create Customer fields
+        for field in customer_fields:
+            create_single_custom_field("Customer", field)
+        
+        # Custom fields for Item (AI Forecasting)
+        item_fields = [
+            {
+                "fieldname": "forecasted_qty_30_days",
+                "label": "Forecasted Qty (Next 30 Days)",
+                "fieldtype": "Float",
+                "insert_after": "stock_uom",
+                "read_only": 1,
+                "precision": "2",
+                "in_list_view": 1,
+                "description": "AI-forecasted quantity for next 30 days"
+            },
+            {
+                "fieldname": "demand_pattern",
+                "label": "Demand Pattern",
+                "fieldtype": "Select",
+                "options": "\nStable\nIncreasing\nDecreasing\nSeasonal\nVolatile\nErratic",
+                "insert_after": "forecasted_qty_30_days",
+                "read_only": 1,
+                "description": "AI-calculated demand pattern for this item"
+            },
+            {
+                "fieldname": "last_forecast_update",
+                "label": "Last Forecast Update",
+                "fieldtype": "Datetime",
+                "insert_after": "demand_pattern", 
+                "read_only": 1,
+                "description": "Last time AI analytics were updated"
+            }
+        ]
+        
+        # Create Item fields
+        for field in item_fields:
+            create_single_custom_field("Item", field)
         
         print("✓ Custom fields created successfully")
         
@@ -448,17 +508,8 @@ def create_missing_fields_manually():
     try:
         print("🔧 Manually creating missing AI Inventory Forecast fields...")
         
-        # Critical fields for AI Inventory Forecast
+        # Critical fields for AI Inventory Forecast (excluding existing fields)
         critical_fields = [
-            {
-                "fieldname": "preferred_supplier",
-                "label": "Preferred Supplier", 
-                "fieldtype": "Link",
-                "options": "Supplier",
-                "insert_after": "supplier",
-                "read_only": 1,
-                "description": "ML-analyzed preferred supplier"
-            },
             {
                 "fieldname": "auto_create_purchase_order",
                 "label": "Auto Create Purchase Order",
@@ -466,14 +517,6 @@ def create_missing_fields_manually():
                 "insert_after": "reorder_alert",
                 "default": 0,
                 "description": "Auto-create PO when reorder alert triggers"
-            },
-            {
-                "fieldname": "analysis_method",
-                "label": "Analysis Method",
-                "fieldtype": "Data",
-                "insert_after": "confidence_score",
-                "read_only": 1,
-                "description": "Method used for forecast analysis"
             }
         ]
         

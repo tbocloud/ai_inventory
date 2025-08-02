@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-30 22:38:18.863010",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_d6vp",
+  "sync_frequency",
+  "default_lead_time",
+  "min_confidence_threshold",
+  "column_break_oepx",
+  "default_forecast_period",
+  "confidence_threshold",
+  "auto_submit_sales_orders",
+  "auto_refresh_status",
+  "column_break_xsgp",
+  "success_rate_last_sync",
+  "total_forecasts_last_sync",
+  "enable_auto_sync"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_d6vp",
+   "fieldtype": "Section Break",
+   "label": "Insights"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_auto_sync",
+   "fieldtype": "Check",
+   "label": "Enable Auto Sync"
+  },
+  {
+   "fieldname": "sync_frequency",
+   "fieldtype": "Select",
+   "label": "Sync Frequency",
+   "options": "Daily\nWeekly\nMonthly"
+  },
+  {
+   "default": "30",
+   "fieldname": "default_forecast_period",
+   "fieldtype": "Int",
+   "label": "Default Forecast Period (Days)"
+  },
+  {
+   "default": "14",
+   "fieldname": "default_lead_time",
+   "fieldtype": "Int",
+   "label": "Default Lead Time (Days)"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_refresh_status",
+   "fieldtype": "Check",
+   "label": "Auto Refresh Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_submit_sales_orders",
+   "fieldtype": "Check",
+   "label": "Auto Submit Sales Orders"
+  },
+  {
+   "default": "85",
+   "fieldname": "confidence_threshold",
+   "fieldtype": "Percent",
+   "label": "Auto Create SO Confidence Threshold (%)"
+  },
+  {
+   "default": "70",
+   "fieldname": "min_confidence_threshold",
+   "fieldtype": "Percent",
+   "label": "Minimum Confidence Threshold (%)"
+  },
+  {
+   "fieldname": "success_rate_last_sync",
+   "fieldtype": "Percent",
+   "label": "Success Rate (Last Sync)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_forecasts_last_sync",
+   "fieldtype": "Int",
+   "label": "Total Forecasts (Last Sync)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_oepx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xsgp",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-07-30 22:39:45.471204",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Sales Dashboard",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
