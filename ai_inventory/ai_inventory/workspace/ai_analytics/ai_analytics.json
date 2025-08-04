@@ -1,19 +1,11 @@
 {
  "charts": [
   {
-   "chart_name": "AI Sales Dashboard",
-   "label": "AI Sales Dashboard"
-  },
-  {
-   "chart_name": "AI Inventory Dashboard",
-   "label": "AI Inventory Dashboard"
-  },
-  {
    "chart_name": "Ai Consolidated Predictive Insights",
    "label": "Ai Consolidated Predictive Insights"
   }
  ],
- "content": "[{\"id\":\"X8cZOP3Yco\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AI Analytics</span>\",\"col\":12}},{\"id\":\"Wv4YvCPDr7\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ai Consolidated Predictive Insights\",\"col\":12}},{\"id\":\"vxCZ3SpHVP\",\"type\":\"chart\",\"data\":{\"chart_name\":\"AI Inventory Dashboard\",\"col\":6}},{\"id\":\"RAV5eSqhsw\",\"type\":\"chart\",\"data\":{\"chart_name\":\"AI Sales Dashboard\",\"col\":6}},{\"id\":\"cT08CKQPHK\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mk9aYdOVS1\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory\",\"col\":4}},{\"id\":\"SMdkeP_-RE\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Sales\",\"col\":4}},{\"id\":\"KnDKQhD1dl\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"X8cZOP3Yco\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AI Analytics</span>\",\"col\":12}},{\"id\":\"Wv4YvCPDr7\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ai Consolidated Predictive Insights\",\"col\":12}},{\"id\":\"cT08CKQPHK\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mk9aYdOVS1\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory\",\"col\":4}},{\"id\":\"PtOpEe9GXg\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Finance\",\"col\":4}},{\"id\":\"SMdkeP_-RE\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Sales\",\"col\":4}},{\"id\":\"KnDKQhD1dl\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Reports\",\"col\":4}}]",
  "creation": "2025-07-26 19:20:28.437822",
  "custom_blocks": [],
  "docstatus": 0,
@@ -87,25 +79,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "AI Inventory Reports",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "AI Inventory Dashboard Report",
-   "link_count": 0,
-   "link_to": "AI Inventory Dashboard",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "AI Reports",
    "link_count": 3,
    "link_type": "DocType",
@@ -141,9 +114,78 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Finance",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Financial Settings",
+   "link_count": 0,
+   "link_to": "AI Financial Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Financial Forecast",
+   "link_count": 0,
+   "link_to": "AI Financial Forecast",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Cashflow Forecast",
+   "link_count": 0,
+   "link_to": "AI Cashflow Forecast",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Revenue Forecast",
+   "link_count": 0,
+   "link_to": "AI Revenue Forecast",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Forecast Accuracy",
+   "link_count": 0,
+   "link_to": "AI Forecast Accuracy",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Expense Forecast",
+   "link_count": 0,
+   "link_to": "AI Expense Forecast",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-08-02 12:22:44.116026",
+ "modified": "2025-08-02 18:48:11.226708",
  "modified_by": "Administrator",
  "module": "Ai Inventory",
  "name": "AI Analytics",

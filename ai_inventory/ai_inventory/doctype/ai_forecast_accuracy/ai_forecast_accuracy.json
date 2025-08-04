@@ -1,0 +1,282 @@
+{
+ "doctype": "DocType",
+ "name": "AI Forecast Accuracy",
+ "module": "AI Inventory",
+ "autoname": "format:AI-ACC-{#####}",
+ "naming_rule": "Expression",
+ "editable_grid": 1,
+ "track_changes": 1,
+ "engine": "InnoDB",
+ "index_web_pages_for_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "field_order": [
+  "basic_info_section",
+  "company",
+  "forecast_type",
+  "measurement_date",
+  "column_break_4",
+  "forecast_reference",
+  "model_used",
+  "measurement_period",
+  "accuracy_metrics_section",
+  "predicted_value",
+  "actual_value",
+  "accuracy_percentage",
+  "column_break_10",
+  "absolute_error",
+  "percentage_error",
+  "squared_error",
+  "statistical_metrics_section",
+  "mean_absolute_error",
+  "mean_squared_error",
+  "root_mean_squared_error",
+  "column_break_16",
+  "mean_absolute_percentage_error",
+  "r_squared",
+  "correlation_coefficient",
+  "performance_analysis_section",
+  "accuracy_trend",
+  "performance_grade",
+  "benchmark_comparison",
+  "column_break_22",
+  "improvement_suggestions",
+  "confidence_calibration",
+  "model_reliability_score",
+  "details_section",
+  "error_analysis",
+  "seasonal_accuracy",
+  "contextual_factors"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "forecast_type",
+   "fieldtype": "Select",
+   "label": "Forecast Type",
+   "options": "Cash Flow\nRevenue\nExpense\nInventory\nIntegrated",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "measurement_date",
+   "fieldtype": "Date",
+   "label": "Measurement Date",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "forecast_reference",
+   "fieldtype": "Dynamic Link",
+   "label": "Forecast Reference",
+   "options": "forecast_type_field"
+  },
+  {
+   "fieldname": "model_used",
+   "fieldtype": "Data",
+   "label": "Model Used"
+  },
+  {
+   "fieldname": "measurement_period",
+   "fieldtype": "Select",
+   "label": "Measurement Period",
+   "options": "Daily\nWeekly\nMonthly\nQuarterly"
+  },
+  {
+   "fieldname": "accuracy_metrics_section",
+   "fieldtype": "Section Break",
+   "label": "Accuracy Metrics"
+  },
+  {
+   "fieldname": "predicted_value",
+   "fieldtype": "Currency",
+   "label": "Predicted Value"
+  },
+  {
+   "fieldname": "actual_value",
+   "fieldtype": "Currency",
+   "label": "Actual Value"
+  },
+  {
+   "fieldname": "accuracy_percentage",
+   "fieldtype": "Percent",
+   "label": "Accuracy Percentage",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "absolute_error",
+   "fieldtype": "Currency",
+   "label": "Absolute Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "percentage_error",
+   "fieldtype": "Percent",
+   "label": "Percentage Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "squared_error",
+   "fieldtype": "Float",
+   "label": "Squared Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "statistical_metrics_section",
+   "fieldtype": "Section Break",
+   "label": "Statistical Metrics"
+  },
+  {
+   "fieldname": "mean_absolute_error",
+   "fieldtype": "Float",
+   "label": "Mean Absolute Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mean_squared_error",
+   "fieldtype": "Float",
+   "label": "Mean Squared Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "root_mean_squared_error",
+   "fieldtype": "Float",
+   "label": "Root Mean Squared Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mean_absolute_percentage_error",
+   "fieldtype": "Percent",
+   "label": "Mean Absolute Percentage Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r_squared",
+   "fieldtype": "Float",
+   "label": "R Squared",
+   "read_only": 1
+  },
+  {
+   "fieldname": "correlation_coefficient",
+   "fieldtype": "Float",
+   "label": "Correlation Coefficient",
+   "read_only": 1
+  },
+  {
+   "fieldname": "performance_analysis_section",
+   "fieldtype": "Section Break",
+   "label": "Performance Analysis"
+  },
+  {
+   "fieldname": "accuracy_trend",
+   "fieldtype": "Select",
+   "label": "Accuracy Trend",
+   "options": "Improving\nDeclining\nStable\nVolatile",
+   "read_only": 1
+  },
+  {
+   "fieldname": "performance_grade",
+   "fieldtype": "Select",
+   "label": "Performance Grade",
+   "options": "A+\nA\nB+\nB\nC+\nC\nD\nF",
+   "read_only": 1
+  },
+  {
+   "fieldname": "benchmark_comparison",
+   "fieldtype": "Select",
+   "label": "Benchmark Comparison",
+   "options": "Above Industry Average\nIndustry Average\nBelow Industry Average",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "improvement_suggestions",
+   "fieldtype": "Long Text",
+   "label": "Improvement Suggestions",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confidence_calibration",
+   "fieldtype": "Percent",
+   "label": "Confidence Calibration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "model_reliability_score",
+   "fieldtype": "Percent",
+   "label": "Model Reliability Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Detailed Analysis"
+  },
+  {
+   "fieldname": "error_analysis",
+   "fieldtype": "Long Text",
+   "label": "Error Analysis (JSON)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "seasonal_accuracy",
+   "fieldtype": "Long Text",
+   "label": "Seasonal Accuracy (JSON)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contextual_factors",
+   "fieldtype": "Long Text",
+   "label": "Contextual Factors"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "AI Inventory Manager",
+   "create": 1,
+   "read": 1,
+   "write": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "share": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1
+  }
+ ],
+ "links": [],
+ "actions": []
+}

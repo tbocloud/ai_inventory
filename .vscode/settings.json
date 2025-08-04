@@ -1,0 +1,58 @@
+{
+    "python.defaultInterpreterPath": "../../../../env/bin/python",
+    "python.analysis.autoSearchPaths": false,
+    "python.analysis.indexing": false,
+    "python.linting.enabled": false,
+    "python.analysis.packageIndexDepths": [
+        {"name": "frappe", "depth": 1},
+        {"name": "erpnext", "depth": 1},
+        {"name": "sklearn", "depth": 1},
+        {"name": "pandas", "depth": 1},
+        {"name": "numpy", "depth": 1}
+    ],
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/node_modules/**": true,
+        "**/env/**": true,
+        "**/.venv/**": true,
+        "**/sites/**": true,
+        "**/logs/**": true,
+        "**/__pycache__/**": true,
+        "**/*.pyc": true,
+        "**/docs/**": true,
+        "**/.pytest_cache/**": true
+    },
+    "search.exclude": {
+        "**/env/**": true,
+        "**/sites/**": true,
+        "**/logs/**": true,
+        "**/__pycache__/**": true,
+        "**/docs/**": true,
+        "**/.pytest_cache/**": true
+    },
+    "python.analysis.exclude": [
+        "**/env/**",
+        "**/sites/**", 
+        "**/logs/**",
+        "**/__pycache__/**",
+        "**/docs/**"
+    ],
+    "files.exclude": {
+        "**/__pycache__/**": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache/**": true
+    },
+    "editor.formatOnSave": false,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": false,
+    "typescript.preferences.includePackageJsonAutoImports": "off",
+    "python.analysis.stubPath": "",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.completeFunctionParens": false,
+    "python.analysis.typeCheckingMode": "off",
+    "python.terminal.activateEnvironment": false,
+    "git.enableSmartCommit": true,
+    "git.autofetch": false,
+    "extensions.autoUpdate": false,
+    "telemetry.telemetryLevel": "off"
+}

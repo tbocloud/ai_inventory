@@ -1,0 +1,343 @@
+{
+ "doctype": "DocType",
+ "name": "AI Financial Alert",
+ "module": "AI Inventory",
+ "autoname": "format:AI-ALERT-{#####}",
+ "track_changes": 1,
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "index_web_pages_for_search": 1,
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "creation": "2024-08-01 12:00:00.000000",
+ "modified": "2024-08-01 12:00:00.000000",
+ "allow_rename": 1,
+ "row_format": "Dynamic",
+ "actions": [],
+ "links": [],
+ "field_order": [
+  "basic_info_section",
+  "company",
+  "alert_type",
+  "alert_date",
+  "column_break_4",
+  "priority",
+  "status",
+  "assigned_to",
+  "alert_details_section",
+  "alert_title",
+  "alert_message",
+  "threshold_value",
+  "column_break_10",
+  "actual_value",
+  "variance_percentage",
+  "confidence_level",
+  "forecast_integration_section",
+  "related_forecast",
+  "forecast_type",
+  "inventory_impact",
+  "column_break_16",
+  "cash_flow_impact",
+  "revenue_impact",
+  "expense_impact",
+  "action_section",
+  "recommended_action",
+  "action_taken",
+  "action_date",
+  "column_break_22",
+  "action_result",
+  "follow_up_required",
+  "next_review_date",
+  "notification_section",
+  "email_sent",
+  "email_recipients",
+  "sms_sent",
+  "column_break_28",
+  "dashboard_notification",
+  "escalation_level",
+  "escalation_date",
+  "technical_details_section",
+  "alert_data",
+  "model_context",
+  "system_logs"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "alert_type",
+   "fieldtype": "Select",
+   "label": "Alert Type",
+   "options": "Cash Flow Warning\nInventory Shortage\nBudget Variance\nRevenue Decline\nExpense Spike\nProfit Margin Alert\nWorking Capital\nDebt Ratio Alert",
+   "reqd": 1
+  },
+  {
+   "fieldname": "alert_date",
+   "fieldtype": "Datetime",
+   "label": "Alert Date",
+   "default": "Now",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "default": "Medium",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nInvestigating\nResolved\nClosed",
+   "default": "Open",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "alert_details_section",
+   "fieldtype": "Section Break",
+   "label": "Alert Details"
+  },
+  {
+   "fieldname": "alert_title",
+   "fieldtype": "Data",
+   "label": "Alert Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "alert_message",
+   "fieldtype": "Text",
+   "label": "Alert Message",
+   "reqd": 1
+  },
+  {
+   "fieldname": "threshold_value",
+   "fieldtype": "Currency",
+   "label": "Threshold Value"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "actual_value",
+   "fieldtype": "Currency",
+   "label": "Actual Value"
+  },
+  {
+   "fieldname": "variance_percentage",
+   "fieldtype": "Percent",
+   "label": "Variance %"
+  },
+  {
+   "fieldname": "confidence_level",
+   "fieldtype": "Percent",
+   "label": "Confidence Level"
+  },
+  {
+   "fieldname": "forecast_integration_section",
+   "fieldtype": "Section Break",
+   "label": "Forecast Integration"
+  },
+  {
+   "fieldname": "related_forecast",
+   "fieldtype": "Link",
+   "label": "Related Forecast",
+   "options": "AI Inventory Forecast"
+  },
+  {
+   "fieldname": "forecast_type",
+   "fieldtype": "Select",
+   "label": "Forecast Type",
+   "options": "Inventory\nSales\nCash Flow\nRevenue\nExpense"
+  },
+  {
+   "fieldname": "inventory_impact",
+   "fieldtype": "Currency",
+   "label": "Inventory Impact"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_flow_impact",
+   "fieldtype": "Currency",
+   "label": "Cash Flow Impact"
+  },
+  {
+   "fieldname": "revenue_impact",
+   "fieldtype": "Currency",
+   "label": "Revenue Impact"
+  },
+  {
+   "fieldname": "expense_impact",
+   "fieldtype": "Currency",
+   "label": "Expense Impact"
+  },
+  {
+   "fieldname": "action_section",
+   "fieldtype": "Section Break",
+   "label": "Actions"
+  },
+  {
+   "fieldname": "recommended_action",
+   "fieldtype": "Text",
+   "label": "Recommended Action"
+  },
+  {
+   "fieldname": "action_taken",
+   "fieldtype": "Text",
+   "label": "Action Taken"
+  },
+  {
+   "fieldname": "action_date",
+   "fieldtype": "Date",
+   "label": "Action Date"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "action_result",
+   "fieldtype": "Text",
+   "label": "Action Result"
+  },
+  {
+   "fieldname": "follow_up_required",
+   "fieldtype": "Check",
+   "label": "Follow-up Required"
+  },
+  {
+   "fieldname": "next_review_date",
+   "fieldtype": "Date",
+   "label": "Next Review Date"
+  },
+  {
+   "fieldname": "notification_section",
+   "fieldtype": "Section Break",
+   "label": "Notifications"
+  },
+  {
+   "fieldname": "email_sent",
+   "fieldtype": "Check",
+   "label": "Email Sent"
+  },
+  {
+   "fieldname": "email_recipients",
+   "fieldtype": "Text",
+   "label": "Email Recipients"
+  },
+  {
+   "fieldname": "sms_sent",
+   "fieldtype": "Check",
+   "label": "SMS Sent"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dashboard_notification",
+   "fieldtype": "Check",
+   "label": "Dashboard Notification"
+  },
+  {
+   "fieldname": "escalation_level",
+   "fieldtype": "Int",
+   "label": "Escalation Level"
+  },
+  {
+   "fieldname": "escalation_date",
+   "fieldtype": "Datetime",
+   "label": "Escalation Date"
+  },
+  {
+   "fieldname": "technical_details_section",
+   "fieldtype": "Section Break",
+   "label": "Technical Details"
+  },
+  {
+   "fieldname": "alert_data",
+   "fieldtype": "Long Text",
+   "label": "Alert Data (JSON)"
+  },
+  {
+   "fieldname": "model_context",
+   "fieldtype": "Long Text",
+   "label": "Model Context"
+  },
+  {
+   "fieldname": "system_logs",
+   "fieldtype": "Long Text",
+   "label": "System Logs"
+  }
+ ],
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "AI Inventory Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "AI Inventory User",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ]
+}

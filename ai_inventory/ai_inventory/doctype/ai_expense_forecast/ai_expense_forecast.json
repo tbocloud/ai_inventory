@@ -1,0 +1,84 @@
+{
+ "doctype": "DocType",
+ "name": "AI Expense Forecast",
+ "module": "AI Inventory",
+ "autoname": "format:AI-EXP-{#####}",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "track_changes": 1,
+ "index_web_pages_for_search": 1,
+ "allow_rename": 1,
+ "field_order": [
+  "basic_info_section", "company", "expense_account", "forecast_period", "column_break_4", "forecast_date", "expense_category", "cost_center",
+  "expense_types_section", "fixed_expenses", "variable_expenses", "semi_variable_expenses", "column_break_10", "inventory_related_expenses", "operational_expenses", "administrative_expenses",
+  "predictions_section", "total_predicted_expense", "expense_growth_rate", "confidence_score", "column_break_16", "seasonal_adjustment", "inflation_factor", "efficiency_factor",
+  "inventory_integration_section", "storage_costs", "handling_costs", "purchase_related_expenses", "column_break_22", "reorder_costs", "carrying_costs", "stockout_costs",
+  "analysis_section", "budget_variance", "cost_per_unit", "efficiency_ratio", "column_break_28", "model_accuracy", "last_updated", "alert_status",
+  "details_section", "expense_breakdown", "cost_drivers", "optimization_suggestions"
+ ],
+ "fields": [
+  { "fieldname": "basic_info_section", "fieldtype": "Section Break", "label": "Basic Information" },
+  { "fieldname": "company", "fieldtype": "Link", "options": "Company", "label": "Company", "reqd": 1, "in_list_view": 1 },
+  { "fieldname": "expense_account", "fieldtype": "Link", "options": "Account", "label": "Expense Account" },
+  { "fieldname": "forecast_period", "fieldtype": "Select", "options": "Monthly\nQuarterly\nAnnually", "label": "Forecast Period", "default": "Monthly", "in_list_view": 1 },
+  { "fieldname": "column_break_4", "fieldtype": "Column Break" },
+  { "fieldname": "forecast_date", "fieldtype": "Date", "label": "Forecast Date", "reqd": 1, "in_list_view": 1 },
+  { "fieldname": "expense_category", "fieldtype": "Select", "options": "Direct\nIndirect\nFixed\nVariable\nSemi-Variable", "label": "Expense Category" },
+  { "fieldname": "cost_center", "fieldtype": "Link", "options": "Cost Center", "label": "Cost Center" },
+
+  { "fieldname": "expense_types_section", "fieldtype": "Section Break", "label": "Expense Types" },
+  { "fieldname": "fixed_expenses", "fieldtype": "Currency", "label": "Fixed Expenses" },
+  { "fieldname": "variable_expenses", "fieldtype": "Currency", "label": "Variable Expenses" },
+  { "fieldname": "semi_variable_expenses", "fieldtype": "Currency", "label": "Semi Variable Expenses" },
+  { "fieldname": "column_break_10", "fieldtype": "Column Break" },
+  { "fieldname": "inventory_related_expenses", "fieldtype": "Currency", "label": "Inventory Related Expenses" },
+  { "fieldname": "operational_expenses", "fieldtype": "Currency", "label": "Operational Expenses" },
+  { "fieldname": "administrative_expenses", "fieldtype": "Currency", "label": "Administrative Expenses" },
+
+  { "fieldname": "predictions_section", "fieldtype": "Section Break", "label": "AI Predictions" },
+  { "fieldname": "total_predicted_expense", "fieldtype": "Currency", "label": "Total Predicted Expense", "read_only": 1, "in_list_view": 1 },
+  { "fieldname": "expense_growth_rate", "fieldtype": "Percent", "label": "Expense Growth Rate", "read_only": 1 },
+  { "fieldname": "confidence_score", "fieldtype": "Percent", "label": "Confidence Score", "read_only": 1, "in_list_view": 1 },
+  { "fieldname": "column_break_16", "fieldtype": "Column Break" },
+  { "fieldname": "seasonal_adjustment", "fieldtype": "Float", "label": "Seasonal Adjustment", "read_only": 1 },
+  { "fieldname": "inflation_factor", "fieldtype": "Percent", "label": "Inflation Factor", "read_only": 1 },
+  { "fieldname": "efficiency_factor", "fieldtype": "Float", "label": "Efficiency Factor", "read_only": 1 },
+
+  { "fieldname": "inventory_integration_section", "fieldtype": "Section Break", "label": "Inventory Integration" },
+  { "fieldname": "storage_costs", "fieldtype": "Currency", "label": "Storage Costs", "read_only": 1 },
+  { "fieldname": "handling_costs", "fieldtype": "Currency", "label": "Handling Costs", "read_only": 1 },
+  { "fieldname": "purchase_related_expenses", "fieldtype": "Currency", "label": "Purchase Related Expenses", "read_only": 1 },
+  { "fieldname": "column_break_22", "fieldtype": "Column Break" },
+  { "fieldname": "reorder_costs", "fieldtype": "Currency", "label": "Reorder Costs", "read_only": 1 },
+  { "fieldname": "carrying_costs", "fieldtype": "Currency", "label": "Carrying Costs", "read_only": 1 },
+  { "fieldname": "stockout_costs", "fieldtype": "Currency", "label": "Stockout Costs", "read_only": 1 },
+
+  { "fieldname": "analysis_section", "fieldtype": "Section Break", "label": "Analysis & Performance" },
+  { "fieldname": "budget_variance", "fieldtype": "Percent", "label": "Budget Variance", "read_only": 1 },
+  { "fieldname": "cost_per_unit", "fieldtype": "Currency", "label": "Cost Per Unit", "read_only": 1 },
+  { "fieldname": "efficiency_ratio", "fieldtype": "Percent", "label": "Efficiency Ratio", "read_only": 1 },
+  { "fieldname": "column_break_28", "fieldtype": "Column Break" },
+  { "fieldname": "model_accuracy", "fieldtype": "Percent", "label": "Model Accuracy", "read_only": 1 },
+  { "fieldname": "last_updated", "fieldtype": "Datetime", "label": "Last Updated", "read_only": 1 },
+  { "fieldname": "alert_status", "fieldtype": "Select", "label": "Alert Status", "options": "Normal\nWarning\nCritical", "read_only": 1 },
+
+  { "fieldname": "details_section", "fieldtype": "Section Break", "label": "Detailed Analysis" },
+  { "fieldname": "expense_breakdown", "fieldtype": "Long Text", "label": "Expense Breakdown (JSON)", "read_only": 1 },
+  { "fieldname": "cost_drivers", "fieldtype": "Long Text", "label": "Cost Drivers" },
+  { "fieldname": "optimization_suggestions", "fieldtype": "Long Text", "label": "Optimization Suggestions", "read_only": 1 }
+ ],
+ "permissions": [
+  {
+   "role": "AI Inventory Manager",
+   "read": 1, "write": 1, "create": 1, "delete": 1,
+   "report": 1, "export": 1, "import": 0, "print": 1, "email": 1, "share": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "read": 1, "write": 1, "create": 1, "delete": 1,
+   "report": 1, "export": 1, "import": 0, "print": 1, "email": 1, "share": 1
+  }
+ ]
+}

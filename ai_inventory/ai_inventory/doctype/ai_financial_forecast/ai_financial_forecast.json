@@ -1,0 +1,424 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:AI-FIN-FCST-{#####}",
+ "creation": "2025-08-02 18:22:21.648428",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_info_section",
+  "company",
+  "account",
+  "account_name",
+  "account_type",
+  "column_break_5",
+  "forecast_type",
+  "forecast_period_days",
+  "forecast_start_date",
+  "forecast_end_date",
+  "forecast_parameters_section",
+  "prediction_model",
+  "confidence_threshold",
+  "seasonal_adjustment",
+  "column_break_12",
+  "external_factors",
+  "integration_mode",
+  "inventory_sync_enabled",
+  "current_status_section",
+  "current_balance",
+  "last_transaction_date",
+  "trend_direction",
+  "column_break_18",
+  "volatility_score",
+  "risk_category",
+  "data_quality_score",
+  "ai_predictions_section",
+  "predicted_amount",
+  "confidence_score",
+  "forecast_accuracy",
+  "column_break_24",
+  "upper_bound",
+  "lower_bound",
+  "alert_threshold",
+  "forecast_alert",
+  "historical_data_section",
+  "historical_data",
+  "forecast_details",
+  "model_parameters",
+  "column_break_31",
+  "last_forecast_date",
+  "next_forecast_date",
+  "forecast_version",
+  "integration_section",
+  "related_inventory_forecast",
+  "sync_status",
+  "last_sync_date",
+  "column_break_36",
+  "auto_sync_enabled",
+  "sync_frequency",
+  "error_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "label": "Account Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "account_type",
+   "fieldtype": "Data",
+   "label": "Account Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "forecast_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Forecast Type",
+   "options": "Cash Flow\nRevenue\nExpense\nBalance Sheet\nP&L",
+   "reqd": 1
+  },
+  {
+   "fieldname": "forecast_period_days",
+   "fieldtype": "Int",
+   "default": 90,
+   "label": "Forecast Period (Days)"
+  },
+  {
+   "fieldname": "forecast_start_date",
+   "fieldtype": "Date",
+   "label": "Forecast Start Date"
+  },
+  {
+   "fieldname": "forecast_end_date",
+   "fieldtype": "Date",
+   "label": "Forecast End Date"
+  },
+  {
+   "fieldname": "forecast_parameters_section",
+   "fieldtype": "Section Break",
+   "label": "Forecast Parameters"
+  },
+  {
+   "fieldname": "prediction_model",
+   "fieldtype": "Select",
+   "default": "ARIMA",
+   "label": "Prediction Model",
+   "options": "ARIMA\nLSTM\nProphet\nLinear Regression\nRandom Forest\nEnsemble"
+  },
+  {
+   "fieldname": "confidence_threshold",
+   "fieldtype": "Percent",
+   "default": 70,
+   "label": "Confidence Threshold"
+  },
+  {
+   "fieldname": "seasonal_adjustment",
+   "fieldtype": "Check",
+   "default": 1,
+   "label": "Seasonal Adjustment"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "external_factors",
+   "fieldtype": "Check",
+   "label": "Include External Factors"
+  },
+  {
+   "fieldname": "integration_mode",
+   "fieldtype": "Select",
+   "default": "Inventory Integrated",
+   "label": "Integration Mode",
+   "options": "Standalone\nInventory Integrated\nFull Integration"
+  },
+  {
+   "fieldname": "inventory_sync_enabled",
+   "fieldtype": "Check",
+   "default": 1,
+   "label": "Inventory Sync Enabled"
+  },
+  {
+   "fieldname": "current_status_section",
+   "fieldtype": "Section Break",
+   "label": "Current Status"
+  },
+  {
+   "fieldname": "current_balance",
+   "fieldtype": "Currency",
+   "label": "Current Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_transaction_date",
+   "fieldtype": "Date",
+   "label": "Last Transaction Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "trend_direction",
+   "fieldtype": "Select",
+   "label": "Trend Direction",
+   "options": "Increasing\nDecreasing\nStable\nVolatile",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "volatility_score",
+   "fieldtype": "Percent",
+   "label": "Volatility Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "risk_category",
+   "fieldtype": "Select",
+   "label": "Risk Category",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "read_only": 1
+  },
+  {
+   "fieldname": "data_quality_score",
+   "fieldtype": "Percent",
+   "label": "Data Quality Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ai_predictions_section",
+   "fieldtype": "Section Break",
+   "label": "AI Predictions"
+  },
+  {
+   "fieldname": "predicted_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Predicted Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confidence_score",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Confidence Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "forecast_accuracy",
+   "fieldtype": "Percent",
+   "label": "Forecast Accuracy",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upper_bound",
+   "fieldtype": "Currency",
+   "label": "Upper Bound",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lower_bound",
+   "fieldtype": "Currency",
+   "label": "Lower Bound",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alert_threshold",
+   "fieldtype": "Currency",
+   "label": "Alert Threshold"
+  },
+  {
+   "fieldname": "forecast_alert",
+   "fieldtype": "Check",
+   "label": "Forecast Alert",
+   "read_only": 1
+  },
+  {
+   "fieldname": "historical_data_section",
+   "fieldtype": "Section Break",
+   "label": "Historical Data & Models"
+  },
+  {
+   "fieldname": "historical_data",
+   "fieldtype": "Long Text",
+   "label": "Historical Data (JSON)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "forecast_details",
+   "fieldtype": "Long Text",
+   "label": "Forecast Details (JSON)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "model_parameters",
+   "fieldtype": "Long Text",
+   "label": "Model Parameters (JSON)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_forecast_date",
+   "fieldtype": "Datetime",
+   "label": "Last Forecast Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "next_forecast_date",
+   "fieldtype": "Datetime",
+   "label": "Next Forecast Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "forecast_version",
+   "fieldtype": "Int",
+   "default": 1,
+   "label": "Forecast Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "integration_section",
+   "fieldtype": "Section Break",
+   "label": "Integration & Sync"
+  },
+  {
+   "fieldname": "related_inventory_forecast",
+   "fieldtype": "Link",
+   "label": "Related Inventory Forecast",
+   "options": "AI Inventory Forecast"
+  },
+  {
+   "fieldname": "sync_status",
+   "fieldtype": "Select",
+   "default": "Pending",
+   "label": "Sync Status",
+   "options": "Pending\nSyncing\nCompleted\nFailed"
+  },
+  {
+   "fieldname": "last_sync_date",
+   "fieldtype": "Datetime",
+   "label": "Last Sync Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auto_sync_enabled",
+   "fieldtype": "Check",
+   "default": 1,
+   "label": "Auto Sync Enabled"
+  },
+  {
+   "fieldname": "sync_frequency",
+   "fieldtype": "Select",
+   "default": "Daily",
+   "label": "Sync Frequency",
+   "options": "Hourly\nDaily\nWeekly\nManual"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Long Text",
+   "label": "Error Log",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-02 18:22:21.648428",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Financial Forecast",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "AI Inventory Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "AI Inventory User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

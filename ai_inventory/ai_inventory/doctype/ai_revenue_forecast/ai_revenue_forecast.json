@@ -1,0 +1,88 @@
+{
+ "doctype": "DocType",
+ "name": "AI Revenue Forecast",
+ "module": "AI Inventory",
+ "autoname": "format:AI-REV-{#####}",
+ "naming_rule": "Expression",
+ "editable_grid": 1,
+ "track_changes": 1,
+ "index_web_pages_for_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "engine": "InnoDB",
+ "row_format": "Dynamic",
+ "field_order": [
+  "basic_info_section", "company", "forecast_period", "forecast_date", "column_break_4",
+  "customer", "territory", "sales_person", "revenue_categories_section",
+  "product_revenue", "service_revenue", "recurring_revenue", "column_break_10",
+  "one_time_revenue", "commission_revenue", "other_revenue", "predictions_section",
+  "total_predicted_revenue", "growth_rate", "confidence_score", "column_break_16",
+  "seasonal_factor", "market_factor", "risk_adjustment", "inventory_integration_section",
+  "inventory_based_sales", "fast_moving_items_revenue", "slow_moving_items_revenue", "column_break_22",
+  "reorder_impact_revenue", "stockout_risk_revenue", "excess_inventory_impact", "analysis_section",
+  "historical_accuracy", "variance_analysis", "trend_analysis", "column_break_28",
+  "model_used", "last_updated", "next_update_date", "details_section",
+  "forecast_breakdown", "assumptions", "risk_factors"
+ ],
+ "fields": [  
+  { "fieldname": "basic_info_section", "fieldtype": "Section Break", "label": "Basic Information" },
+  { "fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company", "reqd": 1, "in_list_view": 1 },
+  { "fieldname": "forecast_period", "fieldtype": "Select", "label": "Forecast Period", "options": "Monthly\nQuarterly\nAnnually", "default": "Monthly", "in_list_view": 1 },
+  { "fieldname": "forecast_date", "fieldtype": "Date", "label": "Forecast Date", "reqd": 1, "in_list_view": 1 },
+  { "fieldname": "column_break_4", "fieldtype": "Column Break" },
+  { "fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer" },
+  { "fieldname": "territory", "fieldtype": "Link", "label": "Territory", "options": "Territory" },
+  { "fieldname": "sales_person", "fieldtype": "Link", "label": "Sales Person", "options": "Sales Person" },
+
+  { "fieldname": "revenue_categories_section", "fieldtype": "Section Break", "label": "Revenue Categories" },
+  { "fieldname": "product_revenue", "fieldtype": "Currency", "label": "Product Revenue" },
+  { "fieldname": "service_revenue", "fieldtype": "Currency", "label": "Service Revenue" },
+  { "fieldname": "recurring_revenue", "fieldtype": "Currency", "label": "Recurring Revenue" },
+  { "fieldname": "column_break_10", "fieldtype": "Column Break" },
+  { "fieldname": "one_time_revenue", "fieldtype": "Currency", "label": "One Time Revenue" },
+  { "fieldname": "commission_revenue", "fieldtype": "Currency", "label": "Commission Revenue" },
+  { "fieldname": "other_revenue", "fieldtype": "Currency", "label": "Other Revenue" },
+
+  { "fieldname": "predictions_section", "fieldtype": "Section Break", "label": "AI Predictions" },
+  { "fieldname": "total_predicted_revenue", "fieldtype": "Currency", "label": "Total Predicted Revenue", "in_list_view": 1, "read_only": 1 },
+  { "fieldname": "growth_rate", "fieldtype": "Percent", "label": "Growth Rate", "read_only": 1 },
+  { "fieldname": "confidence_score", "fieldtype": "Percent", "label": "Confidence Score", "read_only": 1, "in_list_view": 1 },
+  { "fieldname": "column_break_16", "fieldtype": "Column Break" },
+  { "fieldname": "seasonal_factor", "fieldtype": "Float", "label": "Seasonal Factor", "read_only": 1 },
+  { "fieldname": "market_factor", "fieldtype": "Float", "label": "Market Factor", "read_only": 1 },
+  { "fieldname": "risk_adjustment", "fieldtype": "Percent", "label": "Risk Adjustment", "read_only": 1 },
+
+  { "fieldname": "inventory_integration_section", "fieldtype": "Section Break", "label": "Inventory Integration" },
+  { "fieldname": "inventory_based_sales", "fieldtype": "Currency", "label": "Inventory Based Sales", "read_only": 1 },
+  { "fieldname": "fast_moving_items_revenue", "fieldtype": "Currency", "label": "Fast Moving Items Revenue", "read_only": 1 },
+  { "fieldname": "slow_moving_items_revenue", "fieldtype": "Currency", "label": "Slow Moving Items Revenue", "read_only": 1 },
+  { "fieldname": "column_break_22", "fieldtype": "Column Break" },
+  { "fieldname": "reorder_impact_revenue", "fieldtype": "Currency", "label": "Reorder Impact Revenue", "read_only": 1 },
+  { "fieldname": "stockout_risk_revenue", "fieldtype": "Currency", "label": "Stockout Risk Revenue", "read_only": 1 },
+  { "fieldname": "excess_inventory_impact", "fieldtype": "Currency", "label": "Excess Inventory Impact", "read_only": 1 },
+
+  { "fieldname": "analysis_section", "fieldtype": "Section Break", "label": "Analysis & Performance" },
+  { "fieldname": "historical_accuracy", "fieldtype": "Percent", "label": "Historical Accuracy", "read_only": 1 },
+  { "fieldname": "variance_analysis", "fieldtype": "Long Text", "label": "Variance Analysis", "read_only": 1 },
+  { "fieldname": "trend_analysis", "fieldtype": "Long Text", "label": "Trend Analysis", "read_only": 1 },
+  { "fieldname": "column_break_28", "fieldtype": "Column Break" },
+  { "fieldname": "model_used", "fieldtype": "Data", "label": "Model Used", "read_only": 1 },
+  { "fieldname": "last_updated", "fieldtype": "Datetime", "label": "Last Updated", "read_only": 1 },
+  { "fieldname": "next_update_date", "fieldtype": "Datetime", "label": "Next Update Date", "read_only": 1 },
+
+  { "fieldname": "details_section", "fieldtype": "Section Break", "label": "Detailed Analysis" },
+  { "fieldname": "forecast_breakdown", "fieldtype": "Long Text", "label": "Forecast Breakdown (JSON)", "read_only": 1 },
+  { "fieldname": "assumptions", "fieldtype": "Long Text", "label": "Assumptions" },
+  { "fieldname": "risk_factors", "fieldtype": "Long Text", "label": "Risk Factors" }
+ ],
+ "permissions": [
+  {
+   "role": "AI Inventory Manager",
+   "create": 1, "read": 1, "write": 1, "delete": 1, "email": 1, "print": 1, "export": 1, "report": 1, "share": 1
+  },
+  {
+   "role": "Sales Manager",
+   "create": 1, "read": 1, "write": 1, "delete": 1, "email": 1, "print": 1, "export": 1, "report": 1, "share": 1
+  }
+ ]
+}
