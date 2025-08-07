@@ -3,6 +3,7 @@
  "name": "AI Expense Forecast",
  "module": "AI Inventory",
  "autoname": "format:AI-EXP-{#####}",
+ "naming_rule": "Expression",
  "sort_field": "modified",
  "sort_order": "DESC",
  "engine": "InnoDB",

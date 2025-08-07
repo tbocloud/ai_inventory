@@ -15,6 +15,7 @@
   "sync_frequency",
   "confidence_threshold",
   "alert_threshold_percentage",
+  "forecast_trigger_threshold",
   "model_settings_section",
   "default_prediction_model",
   "seasonal_adjustment_enabled",
@@ -57,6 +58,7 @@
   { "fieldname": "sync_frequency", "fieldtype": "Select", "default": "Daily", "label": "Sync Frequency", "options": "Hourly\nDaily\nWeekly" },
   { "fieldname": "confidence_threshold", "fieldtype": "Percent", "default": 70, "label": "Confidence Threshold" },
   { "fieldname": "alert_threshold_percentage", "fieldtype": "Percent", "default": 20, "label": "Alert Threshold Percentage" },
+  { "fieldname": "forecast_trigger_threshold", "fieldtype": "Currency", "default": 1000, "label": "Forecast Trigger Threshold", "description": "Minimum amount that triggers automatic forecast updates" },
 
   { "fieldname": "model_settings_section", "fieldtype": "Section Break", "label": "Model Settings" },
   { "fieldname": "default_prediction_model", "fieldtype": "Select", "default": "ARIMA", "label": "Default Prediction Model", "options": "ARIMA\nLSTM\nProphet\nLinear Regression\nRandom Forest\nEnsemble" },

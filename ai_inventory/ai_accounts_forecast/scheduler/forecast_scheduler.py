@@ -9,7 +9,21 @@ from frappe.utils import cstr, flt, getdate, nowdate, add_days, get_datetime
 from datetime import datetime, timedelta
 import json
 from typing import Dict, List, Optional
-from ai_inventory.ai_accounts_forecast.models.account_forecast import create_financial_forecast, ForecastManager
+
+try:
+    from ai_inventory.ai_accounts_forecast.models.account_forecast import create_financial_forecast, ForecastManager
+except ImportError as e:
+    frappe.log_error(f"Import error in forecast_scheduler: {str(e)}", "Forecast Scheduler Import")
+    # Define fallback functions
+    def create_financial_forecast(*args, **kwargs):
+        return {"status": "error", "message": "ForecastManager not available"}
+    
+    class ForecastManager:
+        def __init__(self, company):
+            self.company = company
+        
+        def validate_system_health(self):
+            return {"health_score": 0, "status": "Import Error", "message": "ForecastManager not available"}
 
 # ============================================================================
 # SCHEDULER SETUP AND CONFIGURATION
@@ -69,6 +83,11 @@ def daily_forecast_update():
     """Daily automated forecast updates for all companies"""
     
     try:
+        # Check if system is ready
+        if not frappe.db.table_exists("AI Financial Forecast"):
+            frappe.log_error("AI Financial Forecast table not found", "Forecast Scheduler")
+            return
+        
         print("🌅 Starting daily forecast update...")
         
         # Get all active companies
@@ -185,6 +204,11 @@ def weekly_health_check():
     """Weekly comprehensive system health monitoring"""
     
     try:
+        # Check if system is ready
+        if not frappe.db.table_exists("AI Financial Forecast"):
+            frappe.log_error("AI Financial Forecast table not found", "Forecast Scheduler Health")
+            return
+        
         print("🏥 Starting weekly system health check...")
         
         companies = frappe.get_all('Company', filters={'disabled': 0}, pluck='name')
@@ -315,6 +339,11 @@ def monthly_cleanup():
     """Monthly cleanup and maintenance tasks"""
     
     try:
+        # Check if system is ready
+        if not frappe.db.table_exists("AI Financial Forecast"):
+            frappe.log_error("AI Financial Forecast table not found", "Forecast Scheduler Cleanup")
+            return
+        
         print("🧹 Starting monthly cleanup and maintenance...")
         
         cleanup_results = {
@@ -554,6 +583,12 @@ def create_scheduler_log(task_type: str, message: str, data: Dict = None):
     """Create log entry for scheduler activities"""
     
     try:
+        # Check if the log DocType exists
+        if not frappe.db.table_exists('AI Forecast Scheduler Log'):
+            # Just log to standard error log if DocType doesn't exist
+            frappe.log_error(f"Scheduler Log ({task_type}): {message}", "AI Forecast Scheduler")
+            return
+        
         log_doc = frappe.get_doc({
             'doctype': 'AI Forecast Scheduler Log',
             'task_type': task_type,
@@ -573,6 +608,12 @@ def save_health_report(health_report: Dict):
     """Save weekly health report to database"""
     
     try:
+        # Check if the health report DocType exists
+        if not frappe.db.table_exists('AI Forecast Health Report'):
+            # Just log to standard error log if DocType doesn't exist
+            frappe.log_error(f"Health Report: {json.dumps(health_report['system_summary'])}", "AI Forecast Health")
+            return
+        
         report_doc = frappe.get_doc({
             'doctype': 'AI Forecast Health Report',
             'report_date': nowdate(),
@@ -593,6 +634,12 @@ def generate_monthly_report():
     """Generate comprehensive monthly system report"""
     
     try:
+        # Check if the monthly report DocType exists
+        if not frappe.db.table_exists('AI Forecast Monthly Report'):
+            # Just log to standard error log if DocType doesn't exist
+            frappe.log_error("Monthly report generated (DocType not found)", "AI Forecast Monthly")
+            return
+        
         # Calculate monthly metrics
         start_date = add_days(nowdate(), -30)
         

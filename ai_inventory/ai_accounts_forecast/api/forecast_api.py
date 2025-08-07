@@ -1,7 +1,5 @@
 # ============================================================================
-# FILE 4: API Endpoints and Integration - COMPLETE VERSION
-# REST API endpoints for external integration
-# Path: ai_inventory/ai_accounts_forecast/api/forecast_api.py
+# Enhanced API endpoints for comprehensive financial forecasting
 # ============================================================================
 
 import frappe
@@ -9,25 +7,17 @@ from frappe import auth, _
 from frappe.utils import cstr, flt, getdate, nowdate
 import json
 from typing import Dict, List, Optional, Union
-from ai_inventory.ai_accounts_forecast.models.account_forecast import create_financial_forecast, ForecastManager
+from ai_inventory.ai_accounts_forecast.models.account_forecast import create_financial_forecast
+from ai_inventory.ai_accounts_forecast.dashboards.financial_forecast_dashboard import get_dashboard_data, get_forecast_chart_data
 
 # ============================================================================
-# CORE FORECAST APIs
+# ENHANCED FORECAST APIs
 # ============================================================================
 
 @frappe.whitelist()
 def api_create_forecast(company: str, account: str, forecast_type: str, **kwargs):
     """
-    API endpoint to create a single financial forecast
-    
-    Args:
-        company: Company name
-        account: Account name  
-        forecast_type: Type of forecast (Cash Flow, Revenue, Expense, Balance Sheet, P&L)
-        **kwargs: Additional parameters (forecast_period_days, confidence_threshold)
-    
-    Returns:
-        JSON response with forecast data or error
+    Enhanced API endpoint to create a single financial forecast
     """
     try:
         # Validate required parameters
@@ -49,6 +39,514 @@ def api_create_forecast(company: str, account: str, forecast_type: str, **kwargs
             forecast_period_days=int(forecast_period_days),
             confidence_threshold=float(confidence_threshold)
         )
+        
+        # Check if the result indicates an error
+        if result.get('status') == 'error':
+            return {
+                'success': False,
+                'error': result.get('error', 'Unknown error'),
+                'message': result.get('message', 'Forecast creation failed')
+            }
+        
+        return {
+            'success': True,
+            'data': result,
+            'message': f'Forecast created successfully for {account}',
+            'forecast_id': result.get('forecast_id'),
+            'confidence_score': result.get('confidence_score')
+        }
+        
+    except Exception as e:
+        error_msg = str(e)
+        # Truncate long error messages
+        if len(error_msg) > 100:
+            error_msg = error_msg[:100] + "..."
+        
+        try:
+            frappe.log_error(error_msg, "AI Forecast API Error")
+        except:
+            # If logging fails, continue without logging
+            pass
+        
+        return {
+            'success': False,
+            'error': error_msg
+        }
+
+@frappe.whitelist()
+def get_forecast_analytics(forecast_id: str):
+    """Get detailed analytics for a specific forecast"""
+    try:
+        forecast = frappe.get_doc("AI Financial Forecast", forecast_id)
+        
+        # Parse forecast details if available
+        forecast_details = {}
+        if forecast.forecast_details:
+            try:
+                forecast_details = json.loads(forecast.forecast_details)
+            except:
+                pass
+        
+        analytics = {
+            "forecast_id": forecast_id,
+            "basic_info": {
+                "account": forecast.account,
+                "forecast_type": forecast.forecast_type,
+                "predicted_amount": forecast.predicted_amount,
+                "confidence": forecast.confidence_score,
+                "risk_category": forecast.risk_category
+            },
+            "model_performance": {
+                "model_type": forecast.prediction_model,
+                "confidence_score": forecast.confidence_score,
+                "upper_bound": forecast.upper_bound,
+                "lower_bound": forecast.lower_bound,
+                "volatility_score": forecast.volatility_score
+            },
+            "data_quality": {
+                "data_quality_score": forecast.data_quality_score,
+                "last_forecast_date": forecast.last_forecast_date,
+                "forecast_version": forecast.forecast_version
+            },
+            "detailed_metrics": forecast_details
+        }
+        
+        return {
+            "success": True,
+            "data": analytics
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@frappe.whitelist()
+def sync_with_inventory(company: str, account: str = None):
+    """Sync financial forecasts with inventory data"""
+    try:
+        from ai_inventory.ai_accounts_forecast.models.account_forecast import AIAccountForecast
+        
+        # Create integrated forecast with inventory sync
+        forecaster = AIAccountForecast(company)
+        
+        if account:
+            # Sync specific account
+            result = forecaster.create_integrated_forecast(account, "Cash Flow")
+            return {
+                "success": True,
+                "message": f"Synced forecast for {account}",
+                "data": {"forecast_id": result.name}
+            }
+        else:
+            # Sync all priority accounts
+            priority_accounts = frappe.get_all("Account",
+                                             filters={"company": company, "is_group": 0},
+                                             limit=5,
+                                             pluck="name")
+            
+            results = []
+            for acc in priority_accounts:
+                try:
+                    result = forecaster.create_integrated_forecast(acc, "Cash Flow")
+                    results.append(result.name)
+                except:
+                    continue
+            
+            return {
+                "success": True,
+                "message": f"Synced {len(results)} forecasts",
+                "data": {"forecast_ids": results}
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@frappe.whitelist()
+def export_forecast_data(forecast_id: str):
+    """Export forecast data to Excel/CSV"""
+    try:
+        forecast = frappe.get_doc("AI Financial Forecast", forecast_id)
+        
+        # Prepare export data
+        export_data = {
+            "Forecast ID": forecast.name,
+            "Company": forecast.company,
+            "Account": forecast.account,
+            "Account Name": forecast.account_name,
+            "Forecast Type": forecast.forecast_type,
+            "Predicted Amount": forecast.predicted_amount,
+            "Confidence Score": forecast.confidence_score,
+            "Upper Bound": forecast.upper_bound,
+            "Lower Bound": forecast.lower_bound,
+            "Risk Category": forecast.risk_category,
+            "Model Used": forecast.prediction_model,
+            "Forecast Period": f"{forecast.forecast_period_days} days",
+            "Created On": forecast.creation
+        }
+        
+        # Create temporary file for download
+        import pandas as pd
+        import tempfile
+        import os
+        
+        df = pd.DataFrame([export_data])
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp_file:
+            df.to_csv(tmp_file.name, index=False)
+            
+            # Return file for download
+            with open(tmp_file.name, 'r') as f:
+                content = f.read()
+            
+            # Cleanup
+            os.unlink(tmp_file.name)
+            
+            return {
+                "success": True,
+                "content": content,
+                "filename": f"forecast_{forecast_id}.csv"
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@frappe.whitelist()
+@frappe.whitelist()
+def get_system_health(company: str = None):
+    """Get comprehensive system health report"""
+    try:
+        if company:
+            # Company-specific health check
+            health_data = _calculate_company_health(company)
+        else:
+            # System-wide health check
+            companies = frappe.get_all("Company", pluck="name")
+            all_health = []
+            total_health = 0
+            
+            for comp in companies:
+                try:
+                    health = _calculate_company_health(comp)
+                    health["company"] = comp
+                    all_health.append(health)
+                    total_health += health.get("health_score", 0)
+                except Exception as comp_error:
+                    frappe.log_error(f"Company health calculation error for {comp}: {str(comp_error)}")
+                    continue
+            
+            # Calculate overall system health
+            if all_health:
+                avg_health = total_health / len(all_health)
+                
+                # Safely calculate forecast types active
+                forecast_types_set = set()
+                for h in all_health:
+                    types_list = h.get("forecast_types_list", [])
+                    if isinstance(types_list, list):
+                        forecast_types_set.update(types_list)
+                
+                health_data = {
+                    "health_score": round(avg_health, 1),
+                    "overall_health_score": round(avg_health, 1),
+                    "companies_checked": len(all_health),
+                    "company_details": all_health,
+                    "status": "Healthy" if avg_health >= 75 else "Needs Improvement" if avg_health >= 50 else "Critical",
+                    "avg_confidence": round(sum(h.get("avg_confidence", 0) for h in all_health) / len(all_health), 1),
+                    "high_confidence_ratio": round(sum(h.get("high_confidence_ratio", 0) for h in all_health) / len(all_health), 1),
+                    "forecast_types_active": len(forecast_types_set),
+                    "total_forecasts": sum(h.get("total_forecasts", 0) for h in all_health),
+                    "active_companies": len([h for h in all_health if h.get("total_forecasts", 0) > 0])
+                }
+                
+                # Add additional system status
+                health_data.update({
+                    "model_performance": "Good" if avg_health >= 75 else "Needs Improvement",
+                    "data_quality": "Good" if health_data["avg_confidence"] >= 70 else "Fair" if health_data["avg_confidence"] >= 50 else "Poor",
+                    "integration_status": "Active" if health_data["total_forecasts"] > 0 else "Inactive",
+                    "last_update": frappe.utils.now()
+                })
+            else:
+                health_data = {
+                    "status": "No Data", 
+                    "health_score": 0,
+                    "avg_confidence": 0,
+                    "high_confidence_ratio": 0,
+                    "forecast_types_active": 0,
+                    "total_forecasts": 0,
+                    "active_companies": 0,
+                    "model_performance": "No Data",
+                    "data_quality": "No Data",
+                    "integration_status": "Inactive",
+                    "last_update": frappe.utils.now()
+                }
+        
+        return health_data
+        
+    except Exception as e:
+        frappe.log_error(f"System health check error: {str(e)}")
+        return {
+            "status": "Error",
+            "health_score": 0,
+            "error": str(e),
+            "avg_confidence": 0,
+            "high_confidence_ratio": 0,
+            "forecast_types_active": 0,
+            "total_forecasts": 0,
+            "active_companies": 0,
+            "model_performance": "Error",
+            "data_quality": "Error",
+            "integration_status": "Error",
+            "last_update": frappe.utils.now()
+        }
+
+def _calculate_company_health(company: str):
+    """Calculate health metrics for a specific company"""
+    try:
+        # Get basic forecast metrics with proper error handling
+        forecasts = frappe.db.sql("""
+            SELECT 
+                COUNT(*) as total_forecasts,
+                AVG(COALESCE(confidence_score, 0)) as avg_confidence,
+                COUNT(CASE WHEN COALESCE(confidence_score, 0) >= 80 THEN 1 END) as high_confidence_count,
+                COUNT(DISTINCT forecast_type) as forecast_types_count
+            FROM `tabAI Financial Forecast`
+            WHERE company = %s AND docstatus != 2
+        """, (company,), as_dict=True)
+        
+        if forecasts and forecasts[0].total_forecasts > 0:
+            data = forecasts[0]
+            high_confidence_ratio = (data.high_confidence_count / data.total_forecasts) * 100 if data.total_forecasts > 0 else 0
+            
+            # Calculate health score based on various factors
+            health_score = min(100, (
+                (data.avg_confidence or 0) * 0.4 +  # 40% weight on average confidence
+                high_confidence_ratio * 0.3 +  # 30% weight on high confidence ratio
+                min(100, (data.forecast_types_count or 0) * 20) * 0.2 +  # 20% weight on variety
+                min(100, (data.total_forecasts or 0) * 2) * 0.1  # 10% weight on volume
+            ))
+            
+            # Get forecast types list
+            forecast_types = frappe.db.sql("""
+                SELECT DISTINCT forecast_type 
+                FROM `tabAI Financial Forecast` 
+                WHERE company = %s AND docstatus != 2 AND forecast_type IS NOT NULL
+            """, (company,), as_dict=True)
+            
+            forecast_types_list = [ft.forecast_type for ft in forecast_types if ft.forecast_type]
+            
+            return {
+                "health_score": round(health_score, 1),
+                "status": "Healthy" if health_score >= 75 else "Needs Improvement" if health_score >= 50 else "Critical",
+                "total_forecasts": int(data.total_forecasts or 0),
+                "avg_confidence": round(data.avg_confidence or 0, 1),
+                "high_confidence_ratio": round(high_confidence_ratio, 1),
+                "forecast_types": int(data.forecast_types_count or 0),
+                "forecast_types_active": int(data.forecast_types_count or 0),
+                "forecast_types_list": forecast_types_list
+            }
+        else:
+            return {
+                "health_score": 0,
+                "status": "No Data",
+                "total_forecasts": 0,
+                "avg_confidence": 0,
+                "high_confidence_ratio": 0,
+                "forecast_types": 0,
+                "forecast_types_active": 0,
+                "forecast_types_list": []
+            }
+            
+    except Exception as e:
+        frappe.log_error(f"Company health calculation error for {company}: {str(e)}")
+        return {
+            "health_score": 0,
+            "status": "Error",
+            "error": str(e),
+            "total_forecasts": 0,
+            "avg_confidence": 0,
+            "high_confidence_ratio": 0,
+            "forecast_types": 0,
+            "forecast_types_active": 0,
+            "forecast_types_list": []
+        }
+
+@frappe.whitelist()
+def get_dashboard_summary(company: str = None, period: str = "month"):
+    """Get dashboard summary data"""
+    try:
+        dashboard_data = get_dashboard_data(company, period)
+        return dashboard_data
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@frappe.whitelist()
+def get_chart_data(company: str = None, chart_type: str = "confidence_trend", period: str = "month"):
+    """Get chart data for dashboard visualizations"""
+    try:
+        chart_data = get_forecast_chart_data(company, chart_type, period)
+        return {
+            "success": True,
+            "data": chart_data
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@frappe.whitelist()
+def bulk_create_forecasts(company: str, accounts: List[str], forecast_types: List[str] = None):
+    """Create multiple forecasts in bulk"""
+    try:
+        from ai_inventory.ai_accounts_forecast.models.account_forecast import ForecastManager
+        
+        if isinstance(accounts, str):
+            accounts = json.loads(accounts)
+        if isinstance(forecast_types, str):
+            forecast_types = json.loads(forecast_types)
+        
+        if not forecast_types:
+            forecast_types = ["Cash Flow", "Revenue", "Expense"]
+        
+        manager = ForecastManager(company)
+        results = manager.create_comprehensive_forecasts(accounts, forecast_types)
+        
+        return {
+            "success": True,
+            "data": results,
+            "message": f"Bulk creation complete: {results['summary']['total_created']} created, {results['summary']['total_failed']} failed"
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@frappe.whitelist()
+def get_forecast_recommendations(company: str, account: str = None):
+    """Get AI recommendations for forecast optimization"""
+    try:
+        recommendations = []
+        
+        # Get current forecasts for analysis
+        filters = {"company": company}
+        if account:
+            filters["account"] = account
+        
+        forecasts = frappe.get_all("AI Financial Forecast",
+                                  filters=filters,
+                                  fields=["account", "forecast_type", "confidence_score", 
+                                         "risk_category", "prediction_model"])
+        
+        # Analyze and generate recommendations
+        for forecast in forecasts:
+            if forecast.confidence_score < 70:
+                recommendations.append({
+                    "type": "improvement",
+                    "priority": "high",
+                    "account": forecast.account,
+                    "message": f"Low confidence ({forecast.confidence_score}%) - consider using Ensemble model",
+                    "action": "change_model",
+                    "suggested_model": "Ensemble"
+                })
+            
+            if forecast.risk_category in ["High", "Critical"]:
+                recommendations.append({
+                    "type": "risk_alert",
+                    "priority": "critical",
+                    "account": forecast.account,
+                    "message": f"High risk detected - increase monitoring frequency",
+                    "action": "increase_monitoring",
+                    "suggested_frequency": "Daily"
+                })
+        
+        # System-wide recommendations
+        total_forecasts = len(forecasts)
+        if total_forecasts < 5:
+            recommendations.append({
+                "type": "coverage",
+                "priority": "medium",
+                "message": "Low forecast coverage - consider adding more accounts",
+                "action": "expand_coverage",
+                "suggestion": "Add key Asset and Income accounts"
+            })
+        
+        return {
+            "success": True,
+            "data": {
+                "recommendations": recommendations,
+                "total_recommendations": len(recommendations),
+                "analysis_summary": {
+                    "forecasts_analyzed": total_forecasts,
+                    "high_priority_issues": len([r for r in recommendations if r["priority"] == "high"]),
+                    "critical_issues": len([r for r in recommendations if r["priority"] == "critical"])
+                }
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@frappe.whitelist()
+def validate_forecast_accuracy(forecast_id: str, actual_amount: float):
+    """Validate forecast accuracy against actual results"""
+    try:
+        forecast = frappe.get_doc("AI Financial Forecast", forecast_id)
+        
+        predicted = forecast.predicted_amount or 0
+        actual = float(actual_amount)
+        
+        # Calculate accuracy metrics
+        absolute_error = abs(predicted - actual)
+        percentage_error = (absolute_error / max(abs(actual), 1)) * 100
+        accuracy_score = max(0, 100 - percentage_error)
+        
+        # Update forecast with actual results
+        forecast.actual_amount = actual
+        forecast.forecast_accuracy = round(accuracy_score, 1)
+        forecast.absolute_error = absolute_error
+        forecast.percentage_error = round(percentage_error, 1)
+        forecast.save()
+        
+        # Create accuracy log
+        accuracy_data = {
+            "forecast_id": forecast_id,
+            "predicted_amount": predicted,
+            "actual_amount": actual,
+            "accuracy_score": accuracy_score,
+            "absolute_error": absolute_error,
+            "percentage_error": percentage_error,
+            "validation_date": nowdate()
+        }
+        
+        return {
+            "success": True,
+            "data": accuracy_data,
+            "message": f"Accuracy validation complete: {accuracy_score:.1f}%"
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
         
         return {
             'success': True, 

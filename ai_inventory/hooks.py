@@ -42,6 +42,24 @@ doc_events = {
     "Sales Invoice": {
         "on_submit": "ai_inventory.forecasting.triggers.on_sales_invoice_submit",
         "on_cancel": "ai_inventory.forecasting.triggers.on_sales_invoice_cancel"
+    },
+    # Financial Forecasting Integration
+    "AI Financial Forecast": {
+        "validate": "ai_inventory.ai_accounts_forecast.hooks.validate_financial_forecast",
+        "on_save": "ai_inventory.ai_accounts_forecast.hooks.on_financial_forecast_save",
+        "after_insert": "ai_inventory.ai_accounts_forecast.hooks.after_financial_forecast_insert"
+    },
+    "Journal Entry": {
+        "on_submit": "ai_inventory.ai_accounts_forecast.hooks.on_journal_entry_submit"
+    },
+    "Payment Entry": {
+        "on_submit": "ai_inventory.ai_accounts_forecast.hooks.on_payment_entry_submit"
+    },
+    "GL Entry": {
+        "on_submit": "ai_inventory.ai_accounts_forecast.hooks.on_gl_entry_submit"
+    },
+    "Account": {
+        "after_insert": "ai_inventory.ai_accounts_forecast.hooks.on_account_created"
     }
 }
 
@@ -64,19 +82,22 @@ scheduler_events = {
     "daily": [
         "ai_inventory.scheduled_tasks.daily_ai_forecast",
         "ai_inventory.hooks_handlers.daily_create_missing_forecasts",
-        "ai_inventory.ml_supplier_analyzer.daily_ml_supplier_analysis"
+        "ai_inventory.ml_supplier_analyzer.daily_ml_supplier_analysis",
+        "ai_inventory.ai_accounts_forecast.scheduler.forecast_scheduler.daily_forecast_update"
     ],
     
     # Weekly tasks (Sunday 7 AM)
     "weekly": [
         "ai_inventory.scheduled_tasks.weekly_forecast_analysis",
-        "ai_inventory.ml_supplier_analyzer.weekly_supplier_segmentation"
+        "ai_inventory.ml_supplier_analyzer.weekly_supplier_segmentation",
+        "ai_inventory.ai_accounts_forecast.scheduler.forecast_scheduler.weekly_health_check"
     ],
     
     # Monthly tasks (1st of month, 8 AM)
     "monthly": [
         "ai_inventory.scheduled_tasks.optimize_forecast_performance",
-        "ai_inventory.scheduled_tasks.cleanup_old_forecast_data"
+        "ai_inventory.scheduled_tasks.cleanup_old_forecast_data",
+        "ai_inventory.ai_accounts_forecast.scheduler.forecast_scheduler.monthly_cleanup"
     ]
 }
 
@@ -116,7 +137,7 @@ fixtures = [
 ]
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/ai_inventory/css/ai_inventory.css"
+app_include_css = "/assets/ai_inventory/css/ai_financial_settings.css"
 # app_include_js = "/assets/ai_inventory/js/ai_inventory.js"
 
 # include js, css files in header of web template

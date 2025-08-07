@@ -1,0 +1,175 @@
+/* AI Financial Settings Custom Styles */
+
+.system-status-dashboard {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.status-metric {
+    text-align: center;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    margin: 5px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.status-metric h4 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #495057;
+}
+
+.status-metric small {
+    color: #6c757d;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.forecast-results {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.forecast-results table {
+    margin-top: 15px;
+}
+
+.health-report {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.health-score {
+    text-align: center;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.sync-results {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.performance-report {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+/* Button styling improvements */
+.btn-custom-forecast {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    margin: 2px;
+}
+
+.btn-custom-forecast:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    color: white;
+}
+
+.btn-custom-system {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+    margin: 2px;
+}
+
+.btn-custom-system:hover {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
+    color: white;
+}
+
+/* Dashboard improvements */
+.forecast-dashboard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.forecast-metric {
+    text-align: center;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin: 5px;
+    backdrop-filter: blur(10px);
+}
+
+.forecast-metric h4 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.forecast-metric small {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .status-metric,
+    .forecast-metric {
+        margin-bottom: 10px;
+    }
+    
+    .forecast-results,
+    .health-report,
+    .sync-results,
+    .performance-report {
+        padding: 15px;
+    }
+}
+
+/* Loading animations */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Success/Error indicators */
+.success-indicator {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.error-indicator {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.warning-indicator {
+    color: #ffc107;
+    font-weight: bold;
+}
