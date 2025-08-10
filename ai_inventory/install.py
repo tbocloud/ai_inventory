@@ -53,21 +53,21 @@ def after_install():
     """Run after app installation - COMPLETE VERSION"""
     try:
         print("Starting AI Inventory post-installation setup...")
-        
+
         # Verify packages are installed (reinstall if needed)
         verify_and_reinstall_packages()
-        
+
         # Create necessary custom fields
         create_custom_fields()
-        
+
         # Setup scheduler
         setup_scheduler()
-        
-        # Create sample AI Settings if not exists
+
+        # Ensure AI Financial Settings exists with sane defaults
         create_ai_settings()
-        
+
         print("AI Inventory installation completed successfully!")
-        
+
     except Exception as e:
         frappe.log_error(f"AI Inventory installation failed: {str(e)}")
         print(f"Installation failed: {str(e)}")
@@ -419,30 +419,44 @@ def setup_scheduler():
         frappe.log_error(f"Scheduler setup failed: {str(e)}")
 
 def create_ai_settings():
-    """Create AI Settings single doctype if not exists"""
+    """Ensure AI Financial Settings single doctype is initialized (backward-compatible)."""
     try:
-        print("Creating AI Settings...")
-        
-        if not frappe.db.exists("AI Settings", "AI Settings"):
-            ai_settings = frappe.get_doc({
-                "doctype": "AI Settings",
-                "auto_sync_enabled": 1,
+        print("Ensuring AI Financial Settings exist...")
+
+        # Prefer the new Single DocType
+        try:
+            settings = frappe.get_doc("AI Financial Settings")
+            # Seed sane defaults if fields are empty
+            changed = False
+            defaults = {
+                "enable_financial_forecasting": 1,
                 "sync_frequency": "Daily",
-                "auto_refresh_status": 1,
-                "forecast_period_days": 30,
-                "default_lead_time_days": 14,
                 "confidence_threshold": 70,
-                "auto_create_po_threshold": 85,
-                "performance_notes": "AI Inventory Forecast system initialized"
-            })
-            ai_settings.insert()
-            print("✓ AI Settings created successfully")
-        else:
-            print("✓ AI Settings already exists")
-            
+                "alert_threshold_percentage": 20,
+                "forecast_trigger_threshold": 1000,
+                "model_retrain_frequency": "Monthly",
+                "min_historical_data_points": 12,
+                "forecast_accuracy_target": 85,
+                "email_alerts_enabled": 1,
+            }
+            for k, v in defaults.items():
+                if getattr(settings, k, None) in (None, ""):
+                    setattr(settings, k, v)
+                    changed = True
+            if changed:
+                settings.save()
+                print("✓ AI Financial Settings initialized with defaults")
+            else:
+                print("✓ AI Financial Settings already configured")
+        except Exception as inner_e:
+            # If the new DocType is unavailable (older app version), fall back to legacy creation as no-op
+            print(f"⚠️ Could not access 'AI Financial Settings': {inner_e}")
+            print("Skipping legacy 'AI Settings' creation to avoid runtime errors.")
+            frappe.log_error(f"AI Financial Settings initialization skipped: {str(inner_e)}")
+
     except Exception as e:
-        print(f"✗ AI Settings creation failed: {str(e)}")
-        frappe.log_error(f"AI Settings creation failed: {str(e)}")
+        print(f"✗ AI Financial Settings initialization failed: {str(e)}")
+        frappe.log_error(f"AI Financial Settings initialization failed: {str(e)}")
 
 def before_uninstall():
     """Clean up before app uninstallation"""

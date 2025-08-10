@@ -8,17 +8,22 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "forecast_reference",
   "sync_date",
   "sync_time",
   "sync_type",
+  "sync_status",
   "company",
   "column_break_5",
   "total_items",
   "successful_items",
   "failed_items",
   "success_rate",
+  "sync_duration",
   "reorder_alerts",
   "section_break_11",
+  "sync_message",
+  "sync_timestamp",
   "sync_details"
  ],
  "fields": [
@@ -29,6 +34,13 @@
    "label": "Series",
    "options": "SYNC-LOG-.YYYY.-",
    "reqd": 1
+  },
+  {
+   "fieldname": "forecast_reference",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Forecast Reference",
+   "options": "AI Financial Forecast"
   },
   {
    "fieldname": "sync_date",
@@ -51,6 +63,14 @@
    "label": "Sync Type",
    "options": "Manual Sync\nScheduled Sync\nBackground Sync\nEmergency Sync",
    "reqd": 1
+  },
+  {
+   "fieldname": "sync_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sync Status",
+   "options": "Pending\nSyncing\nCompleted\nFailed",
+   "default": "Pending"
   },
   {
    "fieldname": "column_break_5",
@@ -80,6 +100,12 @@
    "precision": "2"
   },
   {
+   "fieldname": "sync_duration",
+   "fieldtype": "Float",
+   "label": "Sync Duration (seconds)",
+   "precision": "2"
+  },
+  {
    "fieldname": "reorder_alerts",
    "fieldtype": "Int",
    "label": "Reorder Alerts Generated"
@@ -88,6 +114,16 @@
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
    "label": "Sync Details"
+  },
+  {
+   "fieldname": "sync_message",
+   "fieldtype": "Text",
+   "label": "Sync Message"
+  },
+  {
+   "fieldname": "sync_timestamp",
+   "fieldtype": "Datetime",
+   "label": "Sync Timestamp"
   },
   {
    "fieldname": "sync_details",

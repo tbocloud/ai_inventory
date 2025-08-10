@@ -23,6 +23,10 @@
   "predicted_value",
   "actual_value",
   "accuracy_percentage",
+    "variance",
+    "variance_percentage",
+    "absolute_percentage_error",
+    "accuracy_rating",
   "column_break_10",
   "absolute_error",
   "percentage_error",
@@ -66,7 +70,7 @@
    "fieldname": "forecast_type",
    "fieldtype": "Select",
    "label": "Forecast Type",
-   "options": "Cash Flow\nRevenue\nExpense\nInventory\nIntegrated",
+   "options": "Cash Flow\nRevenue\nExpense\nInventory\nIntegrated\nBalance Sheet\nP&L",
    "reqd": 1,
    "in_list_view": 1
   },
@@ -119,6 +123,30 @@
    "read_only": 1,
    "in_list_view": 1
   },
+    {
+     "fieldname": "variance",
+     "fieldtype": "Currency",
+     "label": "Variance",
+     "read_only": 1
+    },
+    {
+     "fieldname": "variance_percentage",
+     "fieldtype": "Percent",
+     "label": "Variance %",
+     "read_only": 1
+    },
+    {
+     "fieldname": "absolute_percentage_error",
+     "fieldtype": "Percent",
+     "label": "Absolute % Error",
+     "read_only": 1
+    },
+    {
+     "fieldname": "accuracy_rating",
+     "fieldtype": "Data",
+     "label": "Accuracy Rating",
+     "read_only": 1
+    },
   {
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"

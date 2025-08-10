@@ -17,9 +17,34 @@ class AIFinancialForecast(Document):
         self.validate_confidence_score()
         self.validate_amounts()
         self.set_account_details()
+        self.set_currency()
         
         # Add current balance validation
         self.validate_current_balance()
+    
+    def set_currency(self):
+        """Set currency based on account, company, or system default"""
+        if not self.currency:
+            # Priority: Account Currency > Company Default Currency > System Default
+            if self.account:
+                account_currency = frappe.db.get_value("Account", self.account, "account_currency")
+                if account_currency:
+                    self.currency = account_currency
+                    return
+            
+            if self.company:
+                company_currency = frappe.db.get_value("Company", self.company, "default_currency")
+                if company_currency:
+                    self.currency = company_currency
+                    return
+            
+            # Fallback to system default or INR
+            try:
+                from erpnext import get_default_currency
+                self.currency = get_default_currency()
+            except:
+                # If ERPNext's get_default_currency is not available, use INR as fallback
+                self.currency = frappe.db.get_single_value("System Settings", "currency") or "INR"
     
     @frappe.whitelist()
     def get_current_balance(self):
@@ -63,7 +88,7 @@ class AIFinancialForecast(Document):
                 "account_balance": float(account_balance),
                 "account": self.account,
                 "as_of_date": frappe.utils.now(),
-                "currency": frappe.db.get_value("Account", self.account, "account_currency") or "INR"
+                "currency": self.currency or frappe.db.get_value("Account", self.account, "account_currency") or "INR"
             }
             
         except Exception as e:
@@ -83,7 +108,7 @@ class AIFinancialForecast(Document):
             if balance_info.get("success"):
                 self.current_balance = balance_info["current_balance"]
                 self.balance_as_of_date = balance_info["as_of_date"]
-                self.balance_currency = balance_info["currency"]
+                self.balance_currency = self.currency or balance_info["currency"]
                 
                 # Calculate balance-to-prediction ratio
                 if self.predicted_amount and self.predicted_amount != 0:
@@ -259,9 +284,22 @@ class AIFinancialForecast(Document):
             current_balance = balance_info["current_balance"]
             alerts = []
             
-            # Get alert thresholds (you might store these in settings)
-            low_balance_threshold = frappe.db.get_single_value("AI Settings", "low_balance_threshold") or 10000
-            critical_balance_threshold = frappe.db.get_single_value("AI Settings", "critical_balance_threshold") or 1000
+            # Get alert thresholds from AI Financial Settings with safe fallbacks
+            def _get_single_safe(doctype: str, field: str):
+                try:
+                    return frappe.db.get_single_value(doctype, field)
+                except Exception:
+                    return None
+
+            # Read thresholds from AI Financial Settings; fallback to sane defaults only
+            low_balance_threshold = (
+                _get_single_safe("AI Financial Settings", "forecast_trigger_threshold")
+                or 10000
+            )
+            critical_balance_threshold = (
+                _get_single_safe("AI Financial Settings", "critical_threshold")
+                or 1000
+            )
             
             # Check for low balance
             if current_balance < critical_balance_threshold:
@@ -298,20 +336,48 @@ class AIFinancialForecast(Document):
                     })
             
             # Send alerts if any
+            alert_records_created = []
             if alerts:
                 for alert in alerts:
+                    # Show immediate message
                     if alert["type"] == "critical":
                         frappe.msgprint(f"🚨 {alert['message']}", alert=True)
                     elif alert["type"] == "warning":
                         frappe.msgprint(f"⚠️ {alert['message']}", alert=True)
                     else:
                         frappe.msgprint(f"ℹ️ {alert['message']}", alert=True)
+                    
+                    # Create AI Financial Alert record
+                    try:
+                        from ai_inventory.ai_inventory.doctype.ai_financial_alert.ai_financial_alert import create_financial_alert
+                        
+                        alert_data = {
+                            "company": self.company,
+                            "title": f"{alert['type'].title()} Balance Alert",
+                            "message": alert['message'],
+                            "priority": "Critical" if alert["type"] == "critical" else "High" if alert["type"] == "warning" else "Medium",
+                            "alert_type": "Balance Monitoring",
+                            "threshold_value": low_balance_threshold if alert["type"] in ["critical", "warning"] else None,
+                            "actual_value": current_balance,
+                            "related_forecast": self.name,
+                            "forecast_type": self.forecast_type,
+                            "confidence_level": self.confidence_score,
+                            "recommended_action": "Review cash flow and take appropriate action" if alert.get("action_required") else "Monitor situation"
+                        }
+                        
+                        alert_result = create_financial_alert(alert_data)
+                        if alert_result.get("success"):
+                            alert_records_created.append(alert_result.get("alert_id"))
+                            
+                    except Exception as e:
+                        frappe.log_error(f"Failed to create alert record: {str(e)}")
             
             return {
                 "success": True,
                 "alerts": alerts,
                 "current_balance": current_balance,
-                "alert_count": len(alerts)
+                "alert_count": len(alerts),
+                "alert_records_created": alert_records_created
             }
             
         except Exception as e:
@@ -615,32 +681,210 @@ class AIFinancialForecast(Document):
     
     def after_insert(self):
         """Actions after inserting new forecast"""
-        self.update_sync_status()
+        self.initiate_comprehensive_sync()
         self.log_forecast_creation()
         self.check_alerts()
-        self.sync_to_specific_forecasts()
     
     def on_update(self):
         """Actions on updating forecast"""
-        self.update_sync_status()
+        # Only sync if important fields changed
+        if self.has_value_changed("predicted_amount") or self.has_value_changed("confidence_score"):
+            self.initiate_comprehensive_sync()
         self.check_alerts()
-        self.sync_to_specific_forecasts()
     
-    def sync_to_specific_forecasts(self):
-        """Sync data to specific forecast DocTypes"""
+    def initiate_comprehensive_sync(self):
+        """Initiate comprehensive sync using the sync manager"""
         try:
-            if self.forecast_type == "Cash Flow":
-                self.sync_to_cashflow_forecast()
-            elif self.forecast_type == "Revenue":
-                self.sync_to_revenue_forecast()
-            elif self.forecast_type == "Expense":
-                self.sync_to_expense_forecast()
+            # Import sync manager from correct path
+            from ai_inventory.ai_inventory.utils.sync_manager import AIFinancialForecastSyncManager
             
-            # Always update forecast accuracy tracking
-            self.create_or_update_accuracy_tracking()
+            # Create sync manager instance
+            sync_manager = AIFinancialForecastSyncManager(self)
+            
+            # Execute sync in background if enabled
+            if self.auto_sync_enabled:
+                if self.sync_frequency == "Manual":
+                    # Set status to pending for manual sync
+                    self.sync_status = "Pending"
+                else:
+                    # Queue background sync job
+                    frappe.enqueue(
+                        'ai_inventory.forecasting.sync_manager.trigger_manual_sync',
+                        queue='long',
+                        timeout=300,
+                        forecast_name=self.name,
+                        job_name=f"Financial Forecast Sync: {self.name}"
+                    )
+                    self.sync_status = "Syncing"
+            else:
+                self.sync_status = "Pending"
+                
+        except Exception as e:
+            frappe.log_error(f"Sync initiation error for {self.name}: {str(e)}")
+            self.sync_status = "Failed"
+            
+    @frappe.whitelist()
+    def manual_sync(self):
+        """Manually trigger sync operation"""
+        try:
+            from ai_inventory.forecasting.sync_manager import trigger_manual_sync
+            result = trigger_manual_sync(self.name)
+            
+            # Reload the document to get updated sync status
+            self.reload()
+            
+            return result
             
         except Exception as e:
-            frappe.log_error(f"Sync to specific forecasts error: {str(e)}")
+            return {"success": False, "error": str(e)}
+    
+    @frappe.whitelist()
+    def get_sync_details(self):
+        """Get detailed sync information"""
+        try:
+            # Get sync logs
+            sync_logs = frappe.get_all("AI Forecast Sync Log",
+                                     filters={"forecast_reference": self.name},
+                                     fields=["sync_status", "sync_message", "sync_timestamp", "sync_duration"],
+                                     order_by="creation desc",
+                                     limit=10)
+            
+            # Get related records - using safe queries with error handling
+            related_records = {}
+            
+            # Safe query for AI Inventory Forecast
+            try:
+                related_records["inventory_forecasts"] = frappe.db.count("AI Inventory Forecast", 
+                                                                        {"company": self.company})
+            except Exception:
+                related_records["inventory_forecasts"] = 0
+            
+            # Safe query for AI Forecast Accuracy
+            try:
+                related_records["accuracy_records"] = frappe.db.count("AI Forecast Accuracy", 
+                                                                     {"forecast_reference": self.name})
+            except Exception:
+                related_records["accuracy_records"] = 0
+            
+            # Count other AI Financial Forecasts in same company
+            try:
+                related_records["other_forecasts"] = frappe.db.count("AI Financial Forecast", 
+                                                                    {"company": self.company, 
+                                                                     "name": ["!=", self.name]})
+            except Exception:
+                related_records["other_forecasts"] = 0
+            
+            # Count sync logs for this forecast
+            try:
+                related_records["total_sync_logs"] = frappe.db.count("AI Forecast Sync Log", 
+                                                                   {"forecast_reference": self.name})
+            except Exception:
+                related_records["total_sync_logs"] = 0
+            
+            return {
+                "success": True,
+                "current_status": self.sync_status,
+                "last_sync_date": self.last_sync_date,
+                "auto_sync_enabled": self.auto_sync_enabled,
+                "sync_frequency": self.sync_frequency,
+                "sync_logs": sync_logs,
+                "related_records": related_records,
+                "sync_summary": {
+                    "total_syncs": len(sync_logs),
+                    "successful_syncs": len([log for log in sync_logs if log.sync_status == "Completed"]),
+                    "failed_syncs": len([log for log in sync_logs if log.sync_status == "Failed"])
+                }
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    @frappe.whitelist()
+    def validate_forecast(self):
+        """Validate forecast data and provide recommendations"""
+        try:
+            warnings = []
+            recommendations = []
+            metrics = {}
+            
+            # Basic data validation
+            if not self.predicted_amount or self.predicted_amount <= 0:
+                warnings.append("Predicted amount is missing or invalid")
+            
+            if not self.confidence_score or self.confidence_score < 50:
+                warnings.append("Confidence score is low (below 50%)")
+                recommendations.append("Consider reviewing input data quality")
+            
+            if not self.forecast_start_date or not self.forecast_end_date:
+                warnings.append("Forecast date range is incomplete")
+            else:
+                # Check if forecast period is reasonable
+                from datetime import datetime
+                start_date = datetime.strptime(str(self.forecast_start_date), "%Y-%m-%d")
+                end_date = datetime.strptime(str(self.forecast_end_date), "%Y-%m-%d")
+                days_diff = (end_date - start_date).days
+                
+                if days_diff <= 0:
+                    warnings.append("Invalid forecast period: end date before start date")
+                elif days_diff > 365:
+                    recommendations.append("Long forecast periods may have reduced accuracy")
+                elif days_diff < 7:
+                    recommendations.append("Very short forecast periods may not capture trends")
+            
+            # Account validation
+            if self.account:
+                account_exists = frappe.db.exists("Account", self.account)
+                if not account_exists:
+                    warnings.append("Selected account does not exist")
+                else:
+                    # Check account type compatibility
+                    account_type = frappe.db.get_value("Account", self.account, "account_type")
+                    if self.forecast_type == "Revenue" and account_type not in ["Income Account", "Revenue"]:
+                        recommendations.append("Account type may not be suitable for revenue forecasting")
+                    elif self.forecast_type == "Expense" and account_type not in ["Expense Account", "Cost of Goods Sold"]:
+                        recommendations.append("Account type may not be suitable for expense forecasting")
+            
+            # Currency validation
+            if self.currency:
+                currency_exists = frappe.db.exists("Currency", self.currency)
+                if not currency_exists:
+                    warnings.append("Selected currency is not valid")
+            
+            # Calculate metrics
+            metrics["accuracy"] = f"{self.confidence_score}%"
+            metrics["confidence"] = "High" if self.confidence_score > 80 else "Medium" if self.confidence_score > 60 else "Low"
+            
+            # Data quality assessment
+            data_quality_score = 100
+            if warnings:
+                data_quality_score -= len(warnings) * 15
+            if not self.forecast_details:
+                data_quality_score -= 10
+            if not self.current_balance:
+                data_quality_score -= 5
+                
+            metrics["data_quality"] = f"{max(0, data_quality_score)}%"
+            
+            # Add recommendations based on data
+            if not self.forecast_details:
+                recommendations.append("Add forecast details for better analysis")
+            
+            if self.forecast_type and not self.sync_status:
+                recommendations.append("Enable sync to integrate with related forecasts")
+            
+            return {
+                "success": True,
+                "warnings": warnings,
+                "recommendations": recommendations,
+                "metrics": metrics,
+                "overall_score": max(0, data_quality_score)
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
     
     def sync_to_cashflow_forecast(self):
         """Sync to AI Cashflow Forecast"""
@@ -1007,7 +1251,19 @@ class AIFinancialForecast(Document):
             if hasattr(company_doc, 'default_finance_email') and company_doc.default_finance_email:
                 recipients.append(company_doc.default_finance_email)
             
-            return list(set(recipients))  # Remove duplicates
+            # Map usernames to their email addresses and filter invalid emails
+            valid_emails = []
+            for r in set(recipients):
+                email = None
+                if isinstance(r, str) and '@' in r:
+                    email = r
+                else:
+                    # Look up the user's email
+                    email = frappe.db.get_value("User", r, "email")
+                if email and frappe.utils.validate_email_address(email, throw=False):
+                    valid_emails.append(email)
+            
+            return list(set(valid_emails))  # unique valid emails only
             
         except:
             return []
@@ -1288,3 +1544,90 @@ def get_forecast_summary(company=None, period_days=30):
         summary["by_type"][ftype]["avg_confidence"] /= count
     
     return summary
+
+    @frappe.whitelist()
+    def validate_forecast(self):
+        """Validate forecast data and provide recommendations"""
+        try:
+            warnings = []
+            recommendations = []
+            metrics = {}
+            
+            # Basic data validation
+            if not self.predicted_amount or self.predicted_amount <= 0:
+                warnings.append("Predicted amount is missing or invalid")
+            
+            if not self.confidence_score or self.confidence_score < 50:
+                warnings.append("Confidence score is low (below 50%)")
+                recommendations.append("Consider reviewing input data quality")
+            
+            if not self.forecast_start_date or not self.forecast_end_date:
+                warnings.append("Forecast date range is incomplete")
+            else:
+                # Check if forecast period is reasonable
+                from datetime import datetime
+                start_date = datetime.strptime(str(self.forecast_start_date), "%Y-%m-%d")
+                end_date = datetime.strptime(str(self.forecast_end_date), "%Y-%m-%d")
+                days_diff = (end_date - start_date).days
+                
+                if days_diff <= 0:
+                    warnings.append("Invalid forecast period: end date before start date")
+                elif days_diff > 365:
+                    recommendations.append("Long forecast periods may have reduced accuracy")
+                elif days_diff < 7:
+                    recommendations.append("Very short forecast periods may not capture trends")
+            
+            # Account validation
+            if self.account:
+                account_exists = frappe.db.exists("Account", self.account)
+                if not account_exists:
+                    warnings.append("Selected account does not exist")
+                else:
+                    # Check account type compatibility
+                    account_type = frappe.db.get_value("Account", self.account, "account_type")
+                    if self.forecast_type == "Revenue" and account_type not in ["Income Account", "Revenue"]:
+                        recommendations.append("Account type may not be suitable for revenue forecasting")
+                    elif self.forecast_type == "Expense" and account_type not in ["Expense Account", "Cost of Goods Sold"]:
+                        recommendations.append("Account type may not be suitable for expense forecasting")
+            
+            # Currency validation
+            if self.currency:
+                currency_exists = frappe.db.exists("Currency", self.currency)
+                if not currency_exists:
+                    warnings.append("Selected currency is not valid")
+            
+            # Calculate metrics
+            metrics["accuracy"] = f"{self.confidence_score}%"
+            metrics["confidence"] = "High" if self.confidence_score > 80 else "Medium" if self.confidence_score > 60 else "Low"
+            
+            # Data quality assessment
+            data_quality_score = 100
+            if warnings:
+                data_quality_score -= len(warnings) * 15
+            if not self.forecast_details:
+                data_quality_score -= 10
+            if not self.current_balance:
+                data_quality_score -= 5
+                
+            metrics["data_quality"] = f"{max(0, data_quality_score)}%"
+            
+            # Add recommendations based on data
+            if not self.forecast_details:
+                recommendations.append("Add forecast details for better analysis")
+            
+            if self.forecast_type and not self.sync_status:
+                recommendations.append("Enable sync to integrate with related forecasts")
+            
+            return {
+                "success": True,
+                "warnings": warnings,
+                "recommendations": recommendations,
+                "metrics": metrics,
+                "overall_score": max(0, data_quality_score)
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }

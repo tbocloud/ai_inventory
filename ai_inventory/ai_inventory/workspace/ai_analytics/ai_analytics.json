@@ -5,7 +5,7 @@
    "label": "Ai Consolidated Predictive Insights"
   }
  ],
- "content": "[{\"id\":\"X8cZOP3Yco\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AI Analytics</span>\",\"col\":12}},{\"id\":\"Wv4YvCPDr7\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ai Consolidated Predictive Insights\",\"col\":12}},{\"id\":\"cT08CKQPHK\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mk9aYdOVS1\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory\",\"col\":4}},{\"id\":\"SMdkeP_-RE\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Sales\",\"col\":4}},{\"id\":\"KnDKQhD1dl\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Reports\",\"col\":4}},{\"id\":\"PtOpEe9GXg\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Finance\",\"col\":4}}]",
+ "content": "[{\"id\":\"X8cZOP3Yco\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AI Analytics</span>\",\"col\":12}},{\"id\":\"Wv4YvCPDr7\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Ai Consolidated Predictive Insights\",\"col\":12}},{\"id\":\"cT08CKQPHK\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mk9aYdOVS1\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Inventory\",\"col\":4}},{\"id\":\"SMdkeP_-RE\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Sales\",\"col\":4}},{\"id\":\"KnDKQhD1dl\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Reports\",\"col\":4}},{\"id\":\"PtOpEe9GXg\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Finance\",\"col\":4}},{\"id\":\"l2Z2CptZlk\",\"type\":\"card\",\"data\":{\"card_name\":\"AI Finance Report\",\"col\":4}}]",
  "creation": "2025-07-26 19:20:28.437822",
  "custom_blocks": [],
  "docstatus": 0,
@@ -119,7 +119,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "AI Finance",
-   "link_count": 7,
+   "link_count": 8,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -193,9 +193,128 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Forecast Sync Log",
+   "link_count": 0,
+   "link_to": "AI Forecast Sync Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Finance Report",
+   "link_count": 10,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "System Health Report",
+   "link_count": 0,
+   "link_to": "system-health-report",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "System Health Report",
+   "link_count": 0,
+   "link_to": "System Health Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Cashflow Projection Report",
+   "link_count": 0,
+   "link_to": "Cashflow Projection Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Forecast Accuracy Report",
+   "link_count": 0,
+   "link_to": "Forecast Accuracy Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Manufacturing Dashboard Report",
+   "link_count": 0,
+   "link_to": "Manufacturing Dashboard Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Risk Assessment Dashboard",
+   "link_count": 0,
+   "link_to": "Risk Assessment Dashboard",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Revenue Trend Analysis Report",
+   "link_count": 0,
+   "link_to": "Revenue Trend Analysis Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Data Quality Assessment Report",
+   "link_count": 0,
+   "link_to": "Data Quality Assessment Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Finance Consolidated Predictive Insights",
+   "link_count": 0,
+   "link_to": "Finance Consolidated Predictive Insights",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Forecast Accuracy Analysis",
+   "link_count": 0,
+   "link_to": "Forecast Accuracy Analysis",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-08-07 09:43:24.548766",
+ "modified": "2025-08-10 12:54:56.761513",
  "modified_by": "Administrator",
  "module": "Ai Inventory",
  "name": "AI Analytics",

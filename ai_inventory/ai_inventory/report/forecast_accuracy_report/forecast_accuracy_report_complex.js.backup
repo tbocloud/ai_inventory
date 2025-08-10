@@ -1,0 +1,1527 @@
+// Copyright (c) 2024, tbocloud and contributors
+// For license information, please see license.txt
+
+frappe.query_reports["Forecast Accuracy Report"] = {
+    onload: function(report) {
+        // Initialize the accuracy report dashboard
+        this.forecast_accuracy_dashboard = new ForecastAccuracyDashboard(report.page);
+        this.forecast_accuracy_dashboard.setup();
+    }
+};
+
+class ForecastAccuracyDashboard {
+    constructor(page) {
+        this.page = page;
+        this.company = frappe.defaults.get_user_default("Company");
+        this.period_days = 30;
+        this.model_type = "all";
+        this.current_data = null;
+    }
+
+    setup() {
+        this.setup_filters();
+        this.setup_menu_items();
+        this.load_report();
+    }
+
+    setup_filters() {
+        // Company filter
+        this.page.add_field({
+            fieldname: 'company',
+            label: __('Company'),
+            fieldtype: 'Link',
+            options: 'Company',
+            default: this.company,
+            change: () => {
+                this.company = this.page.fields_dict.company.get_value();
+                this.load_report();
+            }
+        });
+
+        // Period filter
+        this.page.add_field({
+            fieldname: 'period_days',
+            label: __('Analysis Period (Days)'),
+            fieldtype: 'Select',
+            options: '7\n15\n30\n60\n90',
+            default: '30',
+            change: () => {
+                this.period_days = parseInt(this.page.fields_dict.period_days.get_value());
+                this.load_report();
+            }
+        });
+
+        // Model type filter
+        this.page.add_field({
+            fieldname: 'model_type',
+            label: __('Model Type'),
+            fieldtype: 'Select',
+            options: 'all\nRevenue\nExpense\nCash Flow\nInventory',
+            default: 'all',
+            change: () => {
+                this.model_type = this.page.fields_dict.model_type.get_value();
+                this.load_report();
+            }
+        });
+    }
+
+    setup_menu_items() {
+        // Refresh button
+        this.page.add_menu_item(__('Refresh Analysis'), () => {
+            this.load_report();
+        });
+
+        // Export buttons
+        this.page.add_menu_item(__('Export Excel'), () => {
+            this.export_report('excel');
+        });
+
+        this.page.add_menu_item(__('Export PDF'), () => {
+            this.export_report('pdf');
+        });
+    }
+
+    async load_report() {
+        try {
+            this.show_loading();
+
+            const response = await frappe.call({
+                method: 'ai_inventory.ai_inventory.report.forecast_accuracy_report.forecast_accuracy_report.generate_forecast_accuracy_report',
+                args: {
+                    company: this.company,
+                    period_days: this.period_days,
+                    model_type: this.model_type
+                }
+            });
+
+            if (response.message.success) {
+                this.current_data = response.message.data;
+                this.render_report(response.message.data);
+            } else {
+                frappe.msgprint({
+                    title: __('Error'),
+                    message: response.message.error,
+                    indicator: 'red'
+                });
+            }
+
+        } catch (error) {
+            console.error('Error loading accuracy report:', error);
+            frappe.msgprint({
+                title: __('Error'),
+                message: __('Failed to load forecast accuracy report'),
+                indicator: 'red'
+            });
+        } finally {
+            this.hide_loading();
+        }
+    }
+
+    show_loading() {
+        this.page.main.html(`
+            <div class="text-center" style="padding: 100px;">
+                <i class="fa fa-spinner fa-spin fa-3x text-muted"></i>
+                <p class="text-muted mt-3">Analyzing forecast accuracy...</p>
+                <small>Processing ${this.period_days} days of forecast data</small>
+            </div>
+        `);
+    }
+
+    hide_loading() {
+        // Loading will be replaced by report content
+    }
+
+    render_report(data) {
+        this.render_summary(data.summary, data.accuracy_metrics);
+        this.render_accuracy_metrics(data.accuracy_metrics);
+        this.render_model_performance(data.model_performance);
+        this.render_trends_analysis(data.accuracy_trends);
+        this.render_confidence_analysis(data.confidence_analysis);
+        this.render_insights(data.insights);
+        this.render_recommendations(data.recommendations);
+    }
+
+    render_summary(summary, metrics) {
+        const container = this.page.main.find('.summary-section');
+        
+        const accuracy_color = summary.overall_accuracy >= 85 ? 'success' : 
+                              summary.overall_accuracy >= 75 ? 'warning' : 'danger';
+        
+        const trend_color = summary.accuracy_trend === 'Improving' ? 'success' :
+                           summary.accuracy_trend === 'Declining' ? 'danger' : 'info';
+
+        container.html(`
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Forecast Accuracy Summary</h3>
+                    <small class="text-muted">Analysis Period: ${this.period_days} days</small>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="accuracy-circle bg-${accuracy_color} text-white d-inline-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px; border-radius: 50%; font-size: 18px; font-weight: bold;">
+                                    ${summary.overall_accuracy}%
+                                </div>
+                                <h6 class="mt-2">Overall Accuracy</h6>
+                                <small class="text-muted">${summary.total_forecasts_evaluated} forecasts</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-metric">
+                                <h4>${summary.average_confidence}%</h4>
+                                <p class="text-muted">Average Confidence</p>
+                                <small>vs ${summary.overall_accuracy}% actual</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-metric">
+                                <h4 class="text-primary">${summary.best_performing_model}</h4>
+                                <p class="text-muted">Best Model</p>
+                                <small>Top performing algorithm</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-metric">
+                                <h4 class="text-${trend_color}">${summary.accuracy_trend}</h4>
+                                <p class="text-muted">Accuracy Trend</p>
+                                <small>Recent performance</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="accuracy-distribution">
+                                <h6>Accuracy Distribution</h6>
+                                <div class="progress mb-2" style="height: 30px;">
+                                    <div class="progress-bar bg-success" style="width: ${metrics.accuracy_distribution.high_accuracy_percentage}%"
+                                         title="High Accuracy (≥80%): ${metrics.accuracy_distribution.high_accuracy_percentage}%">
+                                        ${metrics.accuracy_distribution.high_accuracy_percentage}%
+                                    </div>
+                                    <div class="progress-bar bg-warning" style="width: ${metrics.accuracy_distribution.medium_accuracy_percentage}%"
+                                         title="Medium Accuracy (60-79%): ${metrics.accuracy_distribution.medium_accuracy_percentage}%">
+                                        ${metrics.accuracy_distribution.medium_accuracy_percentage}%
+                                    </div>
+                                    <div class="progress-bar bg-danger" style="width: ${metrics.accuracy_distribution.low_accuracy_percentage}%"
+                                         title="Low Accuracy (<60%): ${metrics.accuracy_distribution.low_accuracy_percentage}%">
+                                        ${metrics.accuracy_distribution.low_accuracy_percentage}%
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <small><span class="badge badge-success">High (≥80%)</span> ${metrics.accuracy_distribution.high_accuracy} forecasts</small>
+                                    <small><span class="badge badge-warning">Medium (60-79%)</span> ${metrics.accuracy_distribution.medium_accuracy} forecasts</small>
+                                    <small><span class="badge badge-danger">Low (<60%)</span> ${metrics.accuracy_distribution.low_accuracy} forecasts</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    render_accuracy_metrics(metrics) {
+        const container = this.page.main.find('.accuracy-metrics-section');
+        
+        container.html(`
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Detailed Accuracy Metrics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Statistical Measures</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Mean Accuracy</strong></td>
+                                    <td>${metrics.overall_accuracy}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Median Accuracy</strong></td>
+                                    <td>${metrics.median_accuracy}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Standard Deviation</strong></td>
+                                    <td>${metrics.accuracy_std_dev}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mean Absolute Error</strong></td>
+                                    <td>${metrics.mean_absolute_error}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Median Absolute Error</strong></td>
+                                    <td>${metrics.median_absolute_error}%</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Confidence Calibration</h5>
+                            <div class="calibration-info">
+                                <p><strong>Correlation:</strong> ${metrics.confidence_accuracy_correlation.correlation}</p>
+                                <p><strong>Interpretation:</strong> ${metrics.confidence_accuracy_correlation.interpretation}</p>
+                                <p><strong>Sample Size:</strong> ${metrics.confidence_accuracy_correlation.sample_size} forecasts</p>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-outline-info" onclick="accuracy_report.show_calibration_details()">
+                                        View Calibration Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Forecast Horizon Impact</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Horizon</th>
+                                            <th>Forecast Count</th>
+                                            <th>Average Accuracy</th>
+                                            <th>Median Accuracy</th>
+                                            <th>Performance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${Object.entries(metrics.horizon_analysis).map(([horizon, data]) => `
+                                            <tr>
+                                                <td>${horizon}</td>
+                                                <td>${data.count}</td>
+                                                <td>${data.average_accuracy}%</td>
+                                                <td>${data.median_accuracy}%</td>
+                                                <td>
+                                                    <span class="badge badge-${data.average_accuracy >= 80 ? 'success' : 
+                                                                               data.average_accuracy >= 70 ? 'warning' : 'danger'}">
+                                                        ${data.average_accuracy >= 80 ? 'Excellent' : 
+                                                          data.average_accuracy >= 70 ? 'Good' : 'Needs Improvement'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    render_model_performance(model_performance) {
+        const container = this.page.main.find('.model-performance-section');
+        
+        if (!model_performance || model_performance.length === 0) {
+            container.html(`
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> No model performance data available for comparison
+                </div>
+            `);
+            return;
+        }
+
+        container.html(`
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>Model Performance Comparison</h3>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" onclick="accuracy_report.toggle_model_view('table')">
+                            Table View
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="accuracy_report.toggle_model_view('chart')">
+                            Chart View
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="model-table-view">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Model</th>
+                                        <th>Forecasts</th>
+                                        <th>Avg Accuracy</th>
+                                        <th>Consistency</th>
+                                        <th>Avg Error</th>
+                                        <th>Performance Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${model_performance.map((model, index) => {
+                                        const rank_class = index === 0 ? 'success' : index === 1 ? 'warning' : '';
+                                        const accuracy_class = model.avg_accuracy >= 85 ? 'success' : 
+                                                              model.avg_accuracy >= 75 ? 'warning' : 'danger';
+                                        
+                                        return `
+                                            <tr>
+                                                <td>
+                                                    <span class="badge badge-${rank_class}">
+                                                        ${index + 1}${index === 0 ? ' 🏆' : index === 1 ? ' 🥈' : index === 2 ? ' 🥉' : ''}
+                                                    </span>
+                                                </td>
+                                                <td><strong>${model.model}</strong></td>
+                                                <td>${model.forecast_count}</td>
+                                                <td>
+                                                    <span class="badge badge-${accuracy_class}">
+                                                        ${model.avg_accuracy}%
+                                                    </span>
+                                                </td>
+                                                <td>±${model.accuracy_std_dev}%</td>
+                                                <td>${model.avg_error}%</td>
+                                                <td>
+                                                    <div class="progress" style="width: 60px; height: 20px;">
+                                                        <div class="progress-bar" style="width: ${model.performance_score * 100}%"></div>
+                                                    </div>
+                                                    <small>${(model.performance_score * 100).toFixed(1)}%</small>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-info" 
+                                                            onclick="accuracy_report.analyze_model('${model.model}')">
+                                                        Analyze
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="model-chart-view" style="display: none;">
+                        <canvas id="model-performance-chart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        // Create model performance chart
+        this.create_model_performance_chart(model_performance);
+    }
+
+    create_model_performance_chart(model_performance) {
+        const ctx = document.getElementById('model-performance-chart');
+        if (!ctx) return;
+
+        // Destroy existing chart
+        if (this.chart_instances.model_performance) {
+            this.chart_instances.model_performance.destroy();
+        }
+
+        const labels = model_performance.map(m => m.model);
+        const accuracy_data = model_performance.map(m => m.avg_accuracy);
+        const error_data = model_performance.map(m => m.avg_error);
+        const confidence_data = model_performance.map(m => m.avg_confidence);
+
+        this.chart_instances.model_performance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Average Accuracy (%)',
+                        data: accuracy_data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Average Error (%)',
+                        data: error_data,
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Average Confidence (%)',
+                        data: confidence_data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        type: 'line',
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Prediction Models'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        },
+                        min: 0,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Model Performance Comparison'
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    }
+
+    render_trends_analysis(trends) {
+        const container = this.page.main.find('.trends-analysis-section');
+        
+        if (!trends.weekly_trends || trends.weekly_trends.length === 0) {
+            container.html(`
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> Insufficient data for trend analysis
+                </div>
+            `);
+            return;
+        }
+
+        const trend_color = trends.trend_direction === 'Improving' ? 'success' :
+                           trends.trend_direction === 'Declining' ? 'danger' : 'info';
+
+        container.html(`
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Accuracy Trends Analysis</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4 class="text-${trend_color}">${trends.trend_direction}</h4>
+                                <p class="text-muted">Overall Trend</p>
+                                ${trends.trend_change !== 0 ? 
+                                    `<small>${trends.trend_change > 0 ? '+' : ''}${trends.trend_change}% change</small>` : 
+                                    '<small>No significant change</small>'
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4>${trends.analysis_period_weeks}</h4>
+                                <p class="text-muted">Weeks Analyzed</p>
+                                <small>Data points for trend</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4>${trends.weekly_trends[trends.weekly_trends.length - 1].avg_accuracy}%</h4>
+                                <p class="text-muted">Latest Week Accuracy</p>
+                                <small>Most recent performance</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Weekly Accuracy Trend</h5>
+                            <canvas id="trends-chart" height="80"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        // Create trends chart
+        this.create_trends_chart(trends.weekly_trends);
+    }
+
+    create_trends_chart(weekly_trends) {
+        const ctx = document.getElementById('trends-chart');
+        if (!ctx) return;
+
+        // Destroy existing chart
+        if (this.chart_instances.trends) {
+            this.chart_instances.trends.destroy();
+        }
+
+        this.chart_instances.trends = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: weekly_trends.map(w => moment(w.week_start).format('MMM DD')),
+                datasets: [
+                    {
+                        label: 'Accuracy (%)',
+                        data: weekly_trends.map(w => w.avg_accuracy),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Confidence (%)',
+                        data: weekly_trends.map(w => w.avg_confidence),
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        fill: false,
+                        borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Week'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        },
+                        min: 0,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Weekly Accuracy and Confidence Trends'
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    }
+
+    render_confidence_analysis(confidence_analysis) {
+        const container = this.page.main.find('.confidence-analysis-section');
+        
+        if (!confidence_analysis.confidence_ranges || confidence_analysis.confidence_ranges.length === 0) {
+            container.html(`
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> No confidence analysis data available
+                </div>
+            `);
+            return;
+        }
+
+        container.html(`
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Confidence vs Accuracy Analysis</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4>${confidence_analysis.overall_calibration}%</h4>
+                                <p class="text-muted">Overall Calibration Score</p>
+                                <small>How well confidence predicts accuracy</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Confidence Range</th>
+                                            <th>Forecasts</th>
+                                            <th>Avg Accuracy</th>
+                                            <th>Calibration</th>
+                                            <th>Performance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${confidence_analysis.confidence_ranges.map(range => {
+                                            const calibration_class = range.calibration_score >= 80 ? 'success' :
+                                                                     range.calibration_score >= 60 ? 'warning' : 'danger';
+                                            
+                                            return `
+                                                <tr>
+                                                    <td><strong>${range.confidence_range}</strong></td>
+                                                    <td>${range.forecast_count}</td>
+                                                    <td>${range.avg_accuracy}%</td>
+                                                    <td>
+                                                        <span class="badge badge-${calibration_class}">
+                                                            ${range.calibration_score.toFixed(1)}%
+                                                        </span>
+                                                    </td>
+                                                    <td>${range.high_accuracy_percentage}% high accuracy</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <strong>Calibration Interpretation:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li><strong>Good Calibration (80%+):</strong> Confidence scores accurately reflect forecast accuracy</li>
+                                    <li><strong>Fair Calibration (60-79%):</strong> Confidence scores are somewhat reliable</li>
+                                    <li><strong>Poor Calibration (<60%):</strong> Confidence scores don't reliably predict accuracy</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    render_insights(insights) {
+        const container = this.page.main.find('.insights-section');
+        
+        if (!insights || insights.length === 0) {
+            container.html(`
+                <div class="alert alert-success">
+                    <i class="fa fa-thumbs-up"></i> No specific insights generated. Overall performance looks stable.
+                </div>
+            `);
+            return;
+        }
+
+        container.html(`
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Key Insights <span class="badge badge-info">${insights.length}</span></h3>
+                </div>
+                <div class="card-body">
+                    ${insights.map(insight => {
+                        const icon_map = {
+                            'positive': 'fa-check-circle text-success',
+                            'negative': 'fa-exclamation-triangle text-danger',
+                            'neutral': 'fa-info-circle text-info',
+                            'actionable': 'fa-lightbulb text-warning'
+                        };
+                        
+                        return `
+                            <div class="insight-item border-left-${insight.type === 'positive' ? 'success' : 
+                                                                    insight.type === 'negative' ? 'danger' : 
+                                                                    insight.type === 'neutral' ? 'info' : 'warning'} 
+                                 pl-3 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <i class="fa ${icon_map[insight.type]} mr-2 mt-1"></i>
+                                    <div>
+                                        <h6>${insight.title}</h6>
+                                        <p class="mb-1">${insight.description}</p>
+                                        <small class="text-muted"><strong>Impact:</strong> ${insight.impact}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `);
+    }
+
+    render_recommendations(recommendations) {
+        const container = this.page.main.find('.recommendations-section');
+        
+        if (!recommendations || recommendations.length === 0) {
+            container.html(`
+                <div class="alert alert-success">
+                    <i class="fa fa-check-circle"></i> No specific recommendations needed. 
+                    Your forecast accuracy is performing well.
+                </div>
+            `);
+            return;
+        }
+
+        container.html(`
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Improvement Recommendations <span class="badge badge-warning">${recommendations.length}</span></h3>
+                </div>
+                <div class="card-body">
+                    ${recommendations.map((rec, index) => {
+                        const priority_class = rec.priority === 'High' ? 'danger' : 
+                                              rec.priority === 'Medium' ? 'warning' : 'info';
+                        
+                        return `
+                            <div class="card border-${priority_class} mb-3">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="badge badge-${priority_class}">${rec.priority} Priority</span>
+                                            <strong class="ml-2">${rec.title}</strong>
+                                        </div>
+                                        <small class="text-muted">${rec.timeline}</small>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p>${rec.description}</p>
+                                    
+                                    <h6>Action Items:</h6>
+                                    <ul class="mb-3">
+                                        ${rec.actions.map(action => `<li>${action}</li>`).join('')}
+                                    </ul>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <small><strong>Expected Impact:</strong> ${rec.expected_impact}</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small><strong>Timeline:</strong> ${rec.timeline}</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small><strong>Resources:</strong> ${rec.resources_needed}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-${priority_class}" 
+                                                onclick="accuracy_report.implement_recommendation(${index})">
+                                            Implement
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary ml-2" 
+                                                onclick="accuracy_report.track_recommendation(${index})">
+                                            Track Progress
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info ml-2" 
+                                                onclick="accuracy_report.get_recommendation_details(${index})">
+                                            More Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `);
+    }
+
+    get_recommendation_details(index) {
+        const recommendation = this.current_data.recommendations[index];
+        
+        const d = new frappe.ui.Dialog({
+            title: 'Recommendation Details',
+            size: 'large',
+            fields: [
+                {
+                    fieldtype: 'HTML',
+                    options: `
+                        <div class="recommendation-details">
+                            <h5>${recommendation.title}</h5>
+                            <p><strong>Category:</strong> ${recommendation.category}</p>
+                            <p><strong>Priority:</strong> ${recommendation.priority}</p>
+                            <p><strong>Description:</strong> ${recommendation.description}</p>
+                            
+                            <h6>Detailed Action Plan:</h6>
+                            <ol>
+                                ${recommendation.actions.map(action => `<li>${action}</li>`).join('')}
+                            </ol>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Expected Impact:</strong><br>
+                                    ${recommendation.expected_impact}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Timeline:</strong><br>
+                                    ${recommendation.timeline}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Resources Needed:</strong><br>
+                                    ${recommendation.resources_needed}
+                                </div>
+                            </div>
+                        </div>
+                    `
+                }
+            ]
+        });
+        
+        d.show();
+    }
+
+    // Interactive functions
+    toggle_model_view(view_type) {
+        const table_view = document.getElementById('model-table-view');
+        const chart_view = document.getElementById('model-chart-view');
+        
+        if (view_type === 'table') {
+            table_view.style.display = 'block';
+            chart_view.style.display = 'none';
+        } else {
+            table_view.style.display = 'none';
+            chart_view.style.display = 'block';
+        }
+        
+        // Update button states
+        const buttons = document.querySelectorAll('.btn-group button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    show_calibration_details() {
+        const d = new frappe.ui.Dialog({
+            title: 'Confidence Calibration Details',
+            size: 'large',
+            fields: [
+                {
+                    fieldtype: 'HTML',
+                    options: `
+                        <div class="calibration-details">
+                            <h5>What is Confidence Calibration?</h5>
+                            <p>Confidence calibration measures how well a model's confidence scores match its actual accuracy. 
+                            A well-calibrated model has confidence scores that accurately reflect the likelihood of being correct.</p>
+                            
+                            <h6>Interpretation:</h6>
+                            <ul>
+                                <li><strong>Perfect Calibration:</strong> When confidence = accuracy (e.g., 80% confident predictions are 80% accurate)</li>
+                                <li><strong>Overconfident:</strong> Confidence > Accuracy (model claims higher confidence than actual performance)</li>
+                                <li><strong>Underconfident:</strong> Confidence < Accuracy (model is more accurate than it claims)</li>
+                            </ul>
+                            
+                            <h6>Current System Analysis:</h6>
+                            <div class="row">
+                                ${this.current_data.confidence_analysis.confidence_ranges.map(range => `
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h6>${range.confidence_range}</h6>
+                                                <p>Avg Confidence: ${range.avg_confidence}%<br>
+                                                Avg Accuracy: ${range.avg_accuracy}%<br>
+                                                Difference: ${Math.abs(range.avg_confidence - range.avg_accuracy).toFixed(1)}%</p>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-info" style="width: ${(range.calibration_score)}%"></div>
+                                                </div>
+                                                <small>Calibration Score: ${range.calibration_score.toFixed(1)}%</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `
+                }
+            ]
+        });
+        
+        d.show();
+    }
+
+    analyze_model(model_name) {
+        const d = new frappe.ui.Dialog({
+            title: `Model Analysis: ${model_name}`,
+            size: 'large',
+            fields: [
+                {
+                    fieldtype: 'HTML',
+                    options: `
+                        <div class="text-center">
+                            <i class="fa fa-spinner fa-spin"></i>
+                            <p>Loading detailed model analysis...</p>
+                        </div>
+                    `
+                }
+            ]
+        });
+        
+        d.show();
+        
+        // Fetch detailed model analysis
+        frappe.call({
+            method: 'ai_inventory.ai_inventory.report.forecast_accuracy_report.forecast_accuracy_report.get_model_analysis',
+            args: {
+                company: this.company,
+                model_name: model_name,
+                period_days: this.period_days
+            },
+            callback: (r) => {
+                if (r.message && r.message.success) {
+                    d.fields_dict.html.html(this.generate_model_analysis_html(r.message.data, model_name));
+                } else {
+                    d.fields_dict.html.html('<p class="text-danger">Failed to load model analysis</p>');
+                }
+            }
+        });
+    }
+
+    generate_model_analysis_html(data, model_name) {
+        return `
+            <div class="model-analysis">
+                <h5>${model_name} Performance Analysis</h5>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Performance Metrics</h6>
+                        <table class="table table-sm">
+                            <tr><td>Total Forecasts</td><td>${data.total_forecasts || 0}</td></tr>
+                            <tr><td>Average Accuracy</td><td>${data.avg_accuracy || 0}%</td></tr>
+                            <tr><td>Median Accuracy</td><td>${data.median_accuracy || 0}%</td></tr>
+                            <tr><td>Standard Deviation</td><td>${data.std_dev || 0}%</td></tr>
+                            <tr><td>Best Performance</td><td>${data.max_accuracy || 0}%</td></tr>
+                            <tr><td>Worst Performance</td><td>${data.min_accuracy || 0}%</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Strengths & Weaknesses</h6>
+                        <div class="strengths mb-3">
+                            <strong class="text-success">Strengths:</strong>
+                            <ul>
+                                ${(data.strengths || []).map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="weaknesses">
+                            <strong class="text-danger">Areas for Improvement:</strong>
+                            <ul>
+                                ${(data.weaknesses || []).map(w => `<li>${w}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>Recommendations for ${model_name}</h6>
+                        <div class="alert alert-info">
+                            ${(data.recommendations || []).map(rec => `<p><i class="fa fa-lightbulb"></i> ${rec}</p>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    show_model_comparison() {
+        if (!this.current_data.model_performance || this.current_data.model_performance.length < 2) {
+            frappe.msgprint('Need at least 2 models for comparison');
+            return;
+        }
+
+        const d = new frappe.ui.Dialog({
+            title: 'Advanced Model Comparison',
+            size: 'extra-large',
+            fields: [
+                {
+                    fieldtype: 'HTML',
+                    options: this.generate_model_comparison_html()
+                }
+            ]
+        });
+        
+        d.show();
+    }
+
+    generate_model_comparison_html() {
+        const models = this.current_data.model_performance;
+        
+        return `
+            <div class="model-comparison">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>Detailed Model Comparison</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Accuracy</th>
+                                        <th>Consistency</th>
+                                        <th>Volume</th>
+                                        <th>Error Rate</th>
+                                        <th>Confidence</th>
+                                        <th>Overall Score</th>
+                                        <th>Recommendation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${models.map(model => {
+                                        const recommendation = this.get_model_recommendation(model);
+                                        return `
+                                            <tr>
+                                                <td><strong>${model.model}</strong></td>
+                                                <td>
+                                                    <div class="progress" style="width: 60px;">
+                                                        <div class="progress-bar bg-${model.avg_accuracy >= 80 ? 'success' : 'warning'}" 
+                                                             style="width: ${model.avg_accuracy}%"></div>
+                                                    </div>
+                                                    ${model.avg_accuracy}%
+                                                </td>
+                                                <td>±${model.accuracy_std_dev}%</td>
+                                                <td>${model.forecast_count}</td>
+                                                <td>${model.avg_error}%</td>
+                                                <td>${model.avg_confidence}%</td>
+                                                <td>
+                                                    <span class="badge badge-${model.performance_score >= 0.8 ? 'success' : 
+                                                                               model.performance_score >= 0.6 ? 'warning' : 'danger'}">
+                                                        ${(model.performance_score * 100).toFixed(1)}%
+                                                    </span>
+                                                </td>
+                                                <td><small>${recommendation}</small></td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h6>Model Selection Guidelines</h6>
+                        <div class="alert alert-info">
+                            <ul class="mb-0">
+                                <li><strong>Primary Choice:</strong> ${models[0].model} (Highest overall score)</li>
+                                <li><strong>For High Volume:</strong> ${models.find(m => m.forecast_count === Math.max(...models.map(m => m.forecast_count)))?.model}</li>
+                                <li><strong>Most Consistent:</strong> ${models.find(m => m.accuracy_std_dev === Math.min(...models.map(m => m.accuracy_std_dev)))?.model}</li>
+                                <li><strong>Most Accurate:</strong> ${models.find(m => m.avg_accuracy === Math.max(...models.map(m => m.avg_accuracy)))?.model}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    get_model_recommendation(model) {
+        if (model.performance_score >= 0.8) {
+            return "Excellent - Continue using";
+        } else if (model.performance_score >= 0.6) {
+            return "Good - Monitor closely";
+        } else if (model.avg_accuracy < 70) {
+            return "Needs improvement - Retrain";
+        } else if (model.accuracy_std_dev > 20) {
+            return "Inconsistent - Optimize";
+        } else {
+            return "Consider replacement";
+        }
+    }
+
+    show_detailed_analysis() {
+        const d = new frappe.ui.Dialog({
+            title: 'Detailed Accuracy Analysis',
+            size: 'extra-large',
+            fields: [
+                {
+                    label: 'Analysis Options',
+                    fieldname: 'analysis_type',
+                    fieldtype: 'Select',
+                    options: 'Forecast Type Analysis\nHorizon Impact Analysis\nSeasonal Performance\nError Distribution\nOutlier Analysis',
+                    reqd: 1,
+                    change: () => {
+                        this.load_detailed_analysis(d.get_value('analysis_type'), d);
+                    }
+                },
+                {
+                    fieldtype: 'HTML',
+                    fieldname: 'analysis_results',
+                    options: '<p class="text-muted">Select an analysis type above</p>'
+                }
+            ]
+        });
+        
+        d.show();
+    }
+
+    async load_detailed_analysis(analysis_type, dialog) {
+        try {
+            dialog.fields_dict.analysis_results.html('<div class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading analysis...</div>');
+            
+            const response = await frappe.call({
+                method: 'ai_inventory.ai_inventory.report.forecast_accuracy_report.forecast_accuracy_report.get_detailed_analysis',
+                args: {
+                    company: this.company,
+                    period_days: this.period_days,
+                    analysis_type: analysis_type
+                }
+            });
+
+            if (response.message.success) {
+                dialog.fields_dict.analysis_results.html(this.generate_detailed_analysis_html(analysis_type, response.message.data));
+            } else {
+                dialog.fields_dict.analysis_results.html('<p class="text-danger">Failed to load analysis</p>');
+            }
+
+        } catch (error) {
+            dialog.fields_dict.analysis_results.html('<p class="text-danger">Error loading analysis</p>');
+        }
+    }
+
+    generate_detailed_analysis_html(analysis_type, data) {
+        switch (analysis_type) {
+            case 'Forecast Type Analysis':
+                return this.generate_forecast_type_analysis_html(data);
+            case 'Horizon Impact Analysis':
+                return this.generate_horizon_analysis_html(data);
+            case 'Error Distribution':
+                return this.generate_error_distribution_html(data);
+            default:
+                return '<p>Analysis not implemented yet</p>';
+        }
+    }
+
+    generate_forecast_type_analysis_html(data) {
+        return `
+            <div class="forecast-type-analysis">
+                <h5>Performance by Forecast Type</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Forecast Type</th>
+                                <th>Count</th>
+                                <th>Avg Accuracy</th>
+                                <th>Avg Error</th>
+                                <th>Performance Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(data.type_performance || []).map(type => `
+                                <tr>
+                                    <td><strong>${type.forecast_type}</strong></td>
+                                    <td>${type.forecast_count}</td>
+                                    <td>${type.avg_accuracy}%</td>
+                                    <td>${type.avg_error}%</td>
+                                    <td>
+                                        <span class="badge badge-${type.performance_grade === 'Excellent' ? 'success' : 
+                                                                   type.performance_grade === 'Good' ? 'primary' :
+                                                                   type.performance_grade === 'Fair' ? 'warning' : 'danger'}">
+                                            ${type.performance_grade}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    generate_action_plan() {
+        if (!this.current_data.recommendations || this.current_data.recommendations.length === 0) {
+            frappe.msgprint('No recommendations available for action plan');
+            return;
+        }
+
+        const d = new frappe.ui.Dialog({
+            title: 'Accuracy Improvement Action Plan',
+            size: 'large',
+            fields: [
+                {
+                    fieldtype: 'HTML',
+                    options: `
+                        <div class="action-plan">
+                            <h5>30-60-90 Day Action Plan</h5>
+                            
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <h6>Next 30 Days (Immediate Actions)</h6>
+                                    <ul>
+                                        ${this.current_data.recommendations
+                                            .filter(r => r.priority === 'High')
+                                            .map(r => `<li><strong>${r.title}:</strong> ${r.actions[0] || 'Start implementation'}</li>`)
+                                            .join('')}
+                                    </ul>
+                                </div>
+                                
+                                <div class="timeline-item mt-4">
+                                    <h6>Next 60 Days (Medium-term Improvements)</h6>
+                                    <ul>
+                                        ${this.current_data.recommendations
+                                            .filter(r => r.priority === 'Medium')
+                                            .map(r => `<li><strong>${r.title}:</strong> ${r.actions[1] || r.actions[0] || 'Continue implementation'}</li>`)
+                                            .join('')}
+                                    </ul>
+                                </div>
+                                
+                                <div class="timeline-item mt-4">
+                                    <h6>Next 90 Days (Long-term Optimization)</h6>
+                                    <ul>
+                                        ${this.current_data.recommendations
+                                            .filter(r => r.priority === 'Low')
+                                            .map(r => `<li><strong>${r.title}:</strong> ${r.actions[0] || 'Plan implementation'}</li>`)
+                                            .join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h6>Success Metrics to Track</h6>
+                                <ul>
+                                    <li>Overall accuracy improvement: Target +${this.calculate_improvement_target()}%</li>
+                                    <li>Model consistency: Reduce standard deviation to <15%</li>
+                                    <li>Confidence calibration: Achieve >80% calibration score</li>
+                                    <li>High accuracy forecasts: Increase to >70% of all forecasts</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `
+                }
+            ],
+            primary_action_label: 'Create Tasks',
+            primary_action: () => {
+                this.create_action_plan_tasks();
+                d.hide();
+            }
+        });
+        
+        d.show();
+    }
+
+    calculate_improvement_target() {
+        const current_accuracy = this.current_data.summary.overall_accuracy;
+        if (current_accuracy < 70) return 15;
+        if (current_accuracy < 80) return 10;
+        return 5;
+    }
+
+    async create_action_plan_tasks() {
+        try {
+            const response = await frappe.call({
+                method: 'ai_inventory.ai_inventory.utils.action_plan.create_accuracy_improvement_tasks',
+                args: {
+                    company: this.company,
+                    recommendations: this.current_data.recommendations,
+                    current_accuracy: this.current_data.summary.overall_accuracy
+                }
+            });
+
+            if (response.message.success) {
+                frappe.show_alert({
+                    message: `${response.message.tasks_created} improvement tasks created`,
+                    indicator: 'green'
+                });
+            }
+
+        } catch (error) {
+            frappe.msgprint('Failed to create action plan tasks');
+        }
+    }
+
+    implement_recommendation(index) {
+        const recommendation = this.current_data.recommendations[index];
+        
+        frappe.confirm(
+            `Implement: ${recommendation.title}?<br><br>
+             <strong>Expected Impact:</strong> ${recommendation.expected_impact}<br>
+             <strong>Timeline:</strong> ${recommendation.timeline}<br>
+             <strong>Resources:</strong> ${recommendation.resources_needed}`,
+            () => {
+                this.create_implementation_tasks(recommendation);
+            }
+        );
+    }
+
+    async create_implementation_tasks(recommendation) {
+        try {
+            const response = await frappe.call({
+                method: 'ai_inventory.ai_inventory.utils.recommendations.create_accuracy_improvement_tasks',
+                args: {
+                    recommendation: recommendation,
+                    company: this.company
+                }
+            });
+
+            if (response.message.success) {
+                frappe.show_alert({
+                    message: 'Implementation tasks created successfully',
+                    indicator: 'green'
+                });
+            }
+
+        } catch (error) {
+            frappe.msgprint('Failed to create implementation tasks');
+        }
+    }
+
+    track_recommendation(index) {
+        const recommendation = this.current_data.recommendations[index];
+        
+        const d = new frappe.ui.Dialog({
+            title: 'Track Recommendation Progress',
+            fields: [
+                {
+                    label: 'Recommendation',
+                    fieldname: 'title',
+                    fieldtype: 'Data',
+                    default: recommendation.title,
+                    read_only: 1
+                },
+                {
+                    label: 'Progress (%)',
+                    fieldname: 'progress',
+                    fieldtype: 'Percent',
+                    default: 0
+                },
+                {
+                    label: 'Status',
+                    fieldname: 'status',
+                    fieldtype: 'Select',
+                    options: 'Not Started\nIn Progress\nCompleted\nBlocked',
+                    default: 'Not Started'
+                },
+                {
+                    label: 'Notes',
+                    fieldname: 'notes',
+                    fieldtype: 'Text Editor'
+                }
+            ],
+            primary_action_label: 'Update Progress',
+            primary_action: (values) => {
+                this.save_recommendation_progress(recommendation, values);
+                d.hide();
+            }
+        });
+        
+        d.show();
+    }
+
+    async save_recommendation_progress(recommendation, progress_data) {
+        try {
+            await frappe.call({
+                method: 'ai_inventory.ai_inventory.utils.progress_tracking.save_recommendation_progress',
+                args: {
+                    recommendation_id: recommendation.title,
+                    company: this.company,
+                    progress: progress_data.progress,
+                    status: progress_data.status,
+                    notes: progress_data.notes
+                }
+            });
+
+            frappe.show_alert({
+                message: 'Progress updated successfully',
+                indicator: 'green'
+            });
+
+        } catch (error) {
+            frappe.msgprint('Failed to save progress');
+        }
+    }
+
+    async export_report(format) {
+        try {
+            frappe.show_alert({
+                message: __('Generating accuracy report...'),
+                indicator: 'blue'
+            });
+
+            const response = await frappe.call({
+                method: 'ai_inventory.ai_inventory.report.forecast_accuracy_report.forecast_accuracy_report.export_accuracy_report',
+                args: {
+                    company: this.company,
+                    period_days: this.period_days,
+                    format: format
+                }
+            });
+
+            if (response.message.success) {
+                this.download_file(response.message.content, response.message.filename, 
+                                 response.message.content_type);
+
+                frappe.show_alert({
+                    message: __('Report exported successfully'),
+                    indicator: 'green'
+                });
+            }
+
+        } catch (error) {
+            frappe.msgprint({
+                title: __('Export Error'),
+                message: __('Failed to export accuracy report'),
+                indicator: 'red'
+            });
+        }
+    }
+
+    download_file(content, filename, content_type) {
+        const blob = new Blob([content], { type: content_type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+}
+
+// Global reference for button callbacks
+window.accuracy_report = null;
+
+// Initialize when page loads
+$(document).ready(function() {
+    if (window.location.pathname.includes('forecast-accuracy-report')) {
+        setTimeout(() => {
+            if (cur_page && cur_page.page_name === 'forecast-accuracy-report') {
+                window.accuracy_report = cur_page.page_manager;
+            }
+        }, 1000);
+    }
+});
+
+// Utility functions for accuracy analysis
+frappe.provide('ai_inventory.reports.accuracy');
+
+ai_inventory.reports.accuracy = {
+    
+    quick_accuracy_check: function(company) {
+        return frappe.call({
+            method: 'ai_inventory.ai_inventory.report.forecast_accuracy_report.forecast_accuracy_report.get_quick_accuracy_summary',
+            args: {
+                company: company
+            }
+        });
+    },
+
+    get_model_rankings: function(company, period_days = 90) {
+        return frappe.call({
+            method: 'ai_inventory.ai_inventory.report.forecast_accuracy_report.forecast_accuracy_report.get_model_rankings',
+            args: {
+                company: company,
+                period_days: period_days
+            }
+        });
+    },
+
+    create_accuracy_alert: function(company, threshold) {
+        return frappe.call({
+            method: 'ai_inventory.ai_inventory.utils.alerts.create_accuracy_alert',
+            args: {
+                company: company,
+                accuracy_threshold: threshold
+            }
+        });
+    }
+};
+

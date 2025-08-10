@@ -173,3 +173,50 @@
     color: #ffc107;
     font-weight: bold;
 }
+
+/* Header button alignment for AI Financial Settings */
+/* (scoped container added via JS; no base overrides required) */
+
+.ai-financial-settings-form .page-form .form-actions,
+.ai-financial-settings-form .page-head .page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.ai-financial-settings-form .page-head .actions-btn-group,
+.ai-financial-settings-form .page-head .btn-group,
+.ai-financial-settings-form .form-actions .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.ai-financial-settings-form .page-head .btn,
+.ai-financial-settings-form .form-actions .btn,
+.ai-financial-settings-form .custom-actions .btn {
+    margin: 0;
+}
+
+/* Group custom button sets on this form */
+.ai-financial-settings-form .custom-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 6px;
+    align-items: center;
+}
+
+/* Ensure the custom button groups (by label) align consistently */
+.ai-financial-settings-form .page-head .page-actions .btn-group > .btn,
+.ai-financial-settings-form .page-head .custom-actions > .btn {
+    min-height: 30px;
+}
+
+@media (max-width: 768px) {
+    .ai-financial-settings-form .page-head .page-actions,
+    .ai-financial-settings-form .custom-actions {
+        justify-content: flex-start;
+    }
+}

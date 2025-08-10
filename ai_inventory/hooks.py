@@ -75,6 +75,7 @@ scheduler_events = {
     # Hourly tasks
     "hourly": [
         "ai_inventory.scheduled_tasks.hourly_critical_stock_check",
+        "ai_inventory.scheduled_tasks.check_financial_alerts",
         "ai_inventory.hooks_handlers.process_forecast_update_queue"
     ],
     
@@ -139,6 +140,11 @@ fixtures = [
 # include js, css files in header of desk.html
 app_include_css = "/assets/ai_inventory/css/ai_financial_settings.css"
 # app_include_js = "/assets/ai_inventory/js/ai_inventory.js"
+
+# Pages
+page_js = {
+    "system-health-report": "ai_inventory/ai_inventory/page/system_health_report/system_health_report.js"
+}
 
 # include js, css files in header of web template
 # web_include_css = "/assets/ai_inventory/css/ai_inventory.css"

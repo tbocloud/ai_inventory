@@ -385,5 +385,65 @@ def main():
     else:
         print("❌ Please specify an action. Use --help for options.")
 
+@frappe.whitelist()
+def update_balance(company, account):
+    """
+    Update balance for a specific account - callable from web interface
+    
+    Args:
+        company: Company name
+        account: Account name
+        
+    Returns:
+        Dict with update result
+    """
+    try:
+        manager = CurrentBalanceManager()
+        result = manager.get_account_balance(account, company)
+        
+        if result.get("success"):
+            # Get current balance
+            new_balance = result.get("current_balance", 0)
+            
+            # Update any related forecasts
+            forecasts = frappe.get_all("AI Financial Forecast",
+                                     filters={
+                                         "company": company,
+                                         "account": account,
+                                         "docstatus": ["!=", 2]
+                                     },
+                                     fields=["name"])
+            
+            updated_count = 0
+            for forecast in forecasts:
+                try:
+                    frappe.db.set_value("AI Financial Forecast", 
+                                      forecast.name, 
+                                      "current_balance", 
+                                      new_balance)
+                    updated_count += 1
+                except Exception:
+                    pass
+            
+            frappe.db.commit()
+            
+            return {
+                "success": True,
+                "new_balance": new_balance,
+                "updated_forecasts": updated_count,
+                "message": f"Balance updated successfully for {account}"
+            }
+        else:
+            return {
+                "success": False,
+                "error": result.get("error", "Failed to get account balance")
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 if __name__ == "__main__":
     main()

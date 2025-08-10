@@ -12,7 +12,7 @@
  "engine": "InnoDB",
  "row_format": "Dynamic",
  "field_order": [
-  "basic_info_section", "company", "forecast_period", "forecast_date", "column_break_4",
+  "basic_info_section", "company", "forecast_period", "forecast_date", "revenue_account", "column_break_4",
   "customer", "territory", "sales_person", "revenue_categories_section",
   "product_revenue", "service_revenue", "recurring_revenue", "column_break_10",
   "one_time_revenue", "commission_revenue", "other_revenue", "predictions_section",
@@ -29,6 +29,7 @@
   { "fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company", "reqd": 1, "in_list_view": 1 },
   { "fieldname": "forecast_period", "fieldtype": "Select", "label": "Forecast Period", "options": "Monthly\nQuarterly\nAnnually", "default": "Monthly", "in_list_view": 1 },
   { "fieldname": "forecast_date", "fieldtype": "Date", "label": "Forecast Date", "reqd": 1, "in_list_view": 1 },
+ { "fieldname": "revenue_account", "fieldtype": "Link", "label": "Revenue Account", "options": "Account" },
   { "fieldname": "column_break_4", "fieldtype": "Column Break" },
   { "fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer" },
   { "fieldname": "territory", "fieldtype": "Link", "label": "Territory", "options": "Territory" },

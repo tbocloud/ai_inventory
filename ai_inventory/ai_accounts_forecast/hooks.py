@@ -402,13 +402,19 @@ def get_alert_recipients(company):
         
         recipients.extend([am.parent for am in accounts_managers])
         
-        # Remove duplicates and invalid users
-        valid_recipients = []
-        for recipient in set(recipients):
-            if frappe.db.exists("User", recipient) and frappe.db.get_value("User", recipient, "enabled"):
-                valid_recipients.append(recipient)
+        # Map to emails, remove duplicates, and validate
+        valid_emails = []
+        for r in set(recipients):
+            email = None
+            if isinstance(r, str) and '@' in r:
+                email = r
+            else:
+                if frappe.db.exists("User", r) and frappe.db.get_value("User", r, "enabled"):
+                    email = frappe.db.get_value("User", r, "email")
+            if email and frappe.utils.validate_email_address(email, throw=False):
+                valid_emails.append(email)
         
-        return valid_recipients
+        return list(set(valid_emails))
         
     except Exception as e:
         frappe.log_error(f"Get alert recipients error: {str(e)}", "Financial Forecast Recipients")

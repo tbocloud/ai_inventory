@@ -1,0 +1,27 @@
+{
+ "content": null,
+ "creation": "2025-08-09 18:56:38.950131",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-08-09 18:56:38.950131",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "system-health-report",
+ "owner": "Administrator",
+ "page_name": "system-health-report",
+ "roles": [
+  {
+   "role": "AI Inventory Manager"
+  },
+  {
+   "role": "AI Inventory User"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "standard": "Yes",
+ "system_page": 0,
+ "title": "AI Financial Forecast - System Health Report"
+}

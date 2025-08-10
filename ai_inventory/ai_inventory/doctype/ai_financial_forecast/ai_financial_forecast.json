@@ -14,6 +14,7 @@
   "account_type",
   "column_break_5",
   "forecast_type",
+  "currency",
   "forecast_period_days",
   "forecast_start_date",
   "forecast_end_date",
@@ -106,9 +107,9 @@
    "reqd": 1
   },
   {
+   "default": "90",
    "fieldname": "forecast_period_days",
    "fieldtype": "Int",
-   "default": 90,
    "label": "Forecast Period (Days)"
   },
   {
@@ -127,22 +128,22 @@
    "label": "Forecast Parameters"
   },
   {
+   "default": "ARIMA",
    "fieldname": "prediction_model",
    "fieldtype": "Select",
-   "default": "ARIMA",
    "label": "Prediction Model",
    "options": "ARIMA\nLSTM\nProphet\nLinear Regression\nRandom Forest\nEnsemble"
   },
   {
+   "default": "70",
    "fieldname": "confidence_threshold",
    "fieldtype": "Percent",
-   "default": 70,
    "label": "Confidence Threshold"
   },
   {
+   "default": "1",
    "fieldname": "seasonal_adjustment",
    "fieldtype": "Check",
-   "default": 1,
    "label": "Seasonal Adjustment"
   },
   {
@@ -150,21 +151,22 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "external_factors",
    "fieldtype": "Check",
    "label": "Include External Factors"
   },
   {
+   "default": "Inventory Integrated",
    "fieldname": "integration_mode",
    "fieldtype": "Select",
-   "default": "Inventory Integrated",
    "label": "Integration Mode",
    "options": "Standalone\nInventory Integrated\nFull Integration"
   },
   {
+   "default": "1",
    "fieldname": "inventory_sync_enabled",
    "fieldtype": "Check",
-   "default": 1,
    "label": "Inventory Sync Enabled"
   },
   {
@@ -176,7 +178,15 @@
    "fieldname": "current_balance",
    "fieldtype": "Currency",
    "label": "Current Balance",
+   "options": "currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   },
   {
    "fieldname": "last_transaction_date",
@@ -224,6 +234,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Predicted Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -247,20 +258,24 @@
    "fieldname": "upper_bound",
    "fieldtype": "Currency",
    "label": "Upper Bound",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "lower_bound",
    "fieldtype": "Currency",
    "label": "Lower Bound",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "alert_threshold",
    "fieldtype": "Currency",
-   "label": "Alert Threshold"
+   "label": "Alert Threshold",
+   "options": "currency"
   },
   {
+   "default": "0",
    "fieldname": "forecast_alert",
    "fieldtype": "Check",
    "label": "Forecast Alert",
@@ -306,9 +321,9 @@
    "read_only": 1
   },
   {
+   "default": "1",
    "fieldname": "forecast_version",
    "fieldtype": "Int",
-   "default": 1,
    "label": "Forecast Version",
    "read_only": 1
   },
@@ -324,9 +339,10 @@
    "options": "AI Inventory Forecast"
   },
   {
+   "default": "Pending",
    "fieldname": "sync_status",
    "fieldtype": "Select",
-   "default": "Pending",
+   "in_list_view": 1,
    "label": "Sync Status",
    "options": "Pending\nSyncing\nCompleted\nFailed"
   },
@@ -341,15 +357,15 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "1",
    "fieldname": "auto_sync_enabled",
    "fieldtype": "Check",
-   "default": 1,
    "label": "Auto Sync Enabled"
   },
   {
+   "default": "Daily",
    "fieldname": "sync_frequency",
    "fieldtype": "Select",
-   "default": "Daily",
    "label": "Sync Frequency",
    "options": "Hourly\nDaily\nWeekly\nManual"
   },
@@ -363,7 +379,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-02 18:22:21.648428",
+ "modified": "2025-08-09 10:42:57.785094",
  "modified_by": "Administrator",
  "module": "Ai Inventory",
  "name": "AI Financial Forecast",

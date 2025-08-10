@@ -958,7 +958,7 @@ def api_get_accounts(company: str, account_type: str = None):
         accounts = frappe.get_all(
             'Account',
             filters=filters,
-            fields=['name', 'account_name', 'account_type', 'account_currency'],
+            fields=['name', 'account_name', 'account_type', 'account_currency', 'company'],
             order_by='name'
         )
         

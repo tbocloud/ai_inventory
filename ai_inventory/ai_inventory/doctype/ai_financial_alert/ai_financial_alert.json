@@ -1,22 +1,11 @@
 {
- "doctype": "DocType",
- "name": "AI Financial Alert",
- "module": "AI Inventory",
+ "actions": [],
+ "allow_rename": 1,
  "autoname": "format:AI-ALERT-{#####}",
- "track_changes": 1,
+ "creation": "2024-08-01 12:00:00",
+ "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
- "sort_field": "modified",
- "sort_order": "DESC",
- "index_web_pages_for_search": 1,
- "owner": "Administrator",
- "modified_by": "Administrator",
- "creation": "2024-08-01 12:00:00.000000",
- "modified": "2024-08-01 12:00:00.000000",
- "allow_rename": 1,
- "row_format": "Dynamic",
- "actions": [],
- "links": [],
  "field_order": [
   "basic_info_section",
   "company",
@@ -84,10 +73,10 @@
    "reqd": 1
   },
   {
+   "default": "Now",
    "fieldname": "alert_date",
    "fieldtype": "Datetime",
    "label": "Alert Date",
-   "default": "Now",
    "reqd": 1
   },
   {
@@ -95,19 +84,21 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Priority",
    "options": "Low\nMedium\nHigh\nCritical",
-   "default": "Medium",
    "reqd": 1
   },
   {
+   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "options": "Open\nInvestigating\nResolved\nClosed",
-   "default": "Open",
    "reqd": 1
   },
   {
@@ -145,6 +136,7 @@
   {
    "fieldname": "actual_value",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Actual Value"
   },
   {
@@ -155,6 +147,7 @@
   {
    "fieldname": "confidence_level",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "Confidence Level"
   },
   {
@@ -162,15 +155,16 @@
    "fieldtype": "Section Break",
    "label": "Forecast Integration"
   },
-  {
-   "fieldname": "related_forecast",
-   "fieldtype": "Link",
-   "label": "Related Forecast",
-   "options": "AI Inventory Forecast"
-  },
+    {
+     "fieldname": "related_forecast",
+     "fieldtype": "Link",
+     "label": "Related Forecast",
+     "options": "AI Financial Forecast"
+    },
   {
    "fieldname": "forecast_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Forecast Type",
    "options": "Inventory\nSales\nCash Flow\nRevenue\nExpense"
   },
@@ -228,6 +222,7 @@
    "label": "Action Result"
   },
   {
+   "default": "0",
    "fieldname": "follow_up_required",
    "fieldtype": "Check",
    "label": "Follow-up Required"
@@ -243,6 +238,7 @@
    "label": "Notifications"
   },
   {
+   "default": "0",
    "fieldname": "email_sent",
    "fieldtype": "Check",
    "label": "Email Sent"
@@ -253,6 +249,7 @@
    "label": "Email Recipients"
   },
   {
+   "default": "0",
    "fieldname": "sms_sent",
    "fieldtype": "Check",
    "label": "SMS Sent"
@@ -262,6 +259,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "dashboard_notification",
    "fieldtype": "Check",
    "label": "Dashboard Notification"
@@ -297,6 +295,14 @@
    "label": "System Logs"
   }
  ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-10 11:26:37.507669",
+ "modified_by": "Administrator",
+ "module": "Ai Inventory",
+ "name": "AI Financial Alert",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
@@ -339,5 +345,10 @@
    "share": 1,
    "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
 }

@@ -59,19 +59,24 @@ def get_summary_metrics(company=None, period="month"):
     forecasts = frappe.get_all("AI Financial Forecast", 
                               filters=filters,
                               fields=["predicted_amount", "confidence_score", "forecast_type", 
-                                     "risk_category", "company"])
+                                     "risk_category", "company", "currency"])
     
     if not forecasts:
         return {
             "total_forecasts": 0,
             "total_predicted_value": 0,
             "average_confidence": 0,
-            "high_confidence_count": 0
+            "high_confidence_count": 0,
+            "currency": "INR"
         }
     
     total_predicted = sum(f.predicted_amount for f in forecasts if f.predicted_amount)
     avg_confidence = sum(f.confidence_score for f in forecasts) / len(forecasts)
     high_confidence = len([f for f in forecasts if f.confidence_score >= 80])
+    
+    # Get most common currency
+    currencies = [f.currency for f in forecasts if f.currency]
+    most_common_currency = max(set(currencies), key=currencies.count) if currencies else "INR"
     
     # Forecast type distribution
     type_distribution = {}
@@ -88,6 +93,7 @@ def get_summary_metrics(company=None, period="month"):
         "high_confidence_count": high_confidence,
         "high_confidence_percentage": round(high_confidence / len(forecasts) * 100, 1),
         "type_distribution": type_distribution,
+        "currency": most_common_currency,
         "period": period
     }
 

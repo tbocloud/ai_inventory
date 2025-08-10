@@ -5,3 +5,5 @@
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
 ai_inventory.patches.v1_0.add_master_analytics_fields
+ai_inventory.patches.v2_0.add_currency_to_financial_forecasts
+ai_inventory.patches.v2_0.add_sync_status_field

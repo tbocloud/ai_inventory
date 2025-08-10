@@ -39,7 +39,74 @@ def real_time_stock_monitor():
         frappe.logger().info(f"Real-time monitor: {len(critical_alerts)} critical alerts")
         
     except Exception as e:
-        frappe.log_error(f"Real-time stock monitor failed: {str(e)}")
+        frappe.log_error(title="Real-time stock monitor failed", message=frappe.get_traceback())
+
+def check_financial_alerts():
+    """Check and create financial alerts (hourly)"""
+    try:
+        from ai_inventory.ai_inventory.doctype.ai_financial_alert.ai_financial_alert import create_financial_alert
+        
+        # Get all active financial forecasts
+        forecasts = frappe.get_all("AI Financial Forecast",
+            filters={"docstatus": ["!=", 2]},
+            fields=["name", "company", "forecast_type", "predicted_amount", "confidence_score", "forecast_start_date"]
+        )
+        
+        alerts_created = 0
+        
+        for forecast in forecasts:
+            try:
+                forecast_doc = frappe.get_doc("AI Financial Forecast", forecast.name)
+                
+                # Check balance alerts for cash flow forecasts
+                if forecast.forecast_type == "Cash Flow":
+                    alert_result = forecast_doc.check_balance_alerts()
+                    if alert_result.get("success") and alert_result.get("alert_count", 0) > 0:
+                        alerts_created += alert_result.get("alert_count", 0)
+                
+                # Check for low confidence scores
+                if forecast.confidence_score and forecast.confidence_score < 50:
+                    alert_data = {
+                        "company": forecast.company,
+                        "title": "Low Confidence Forecast",
+                        "message": f"Forecast {forecast.name} has low confidence score: {forecast.confidence_score}%",
+                        "priority": "Medium",
+                        "alert_type": "Forecast Quality",
+                        "related_forecast": forecast.name,
+                        "forecast_type": forecast.forecast_type,
+                        "confidence_level": forecast.confidence_score,
+                        "recommended_action": "Review forecast parameters and data quality"
+                    }
+                    
+                    # Check if similar alert already exists today
+                    existing_alert = frappe.get_all("AI Financial Alert",
+                        filters={
+                            "related_forecast": forecast.name,
+                            "alert_type": "Forecast Quality",
+                            "alert_date": nowdate(),
+                            "status": ["in", ["Open", "Investigating"]]
+                        },
+                        limit=1
+                    )
+                    
+                    if not existing_alert:
+                        create_result = create_financial_alert(alert_data)
+                        if create_result.get("success"):
+                            alerts_created += 1
+                            
+            except Exception as e:
+                frappe.log_error(
+                    title=f"Financial alert check failed for {forecast.name}",
+                    message=frappe.get_traceback()
+                )
+        
+        frappe.logger().info(f"Financial alert check: {alerts_created} alerts created")
+        
+        return {"success": True, "alerts_created": alerts_created}
+        
+    except Exception as e:
+        frappe.log_error(title="Financial alert check failed", message=frappe.get_traceback())
+        return {"success": False, "error": str(e)}
 
 def hourly_critical_stock_check():
     """Hourly critical stock check"""
@@ -66,7 +133,7 @@ def hourly_critical_stock_check():
         frappe.logger().info(f"Hourly check: Updated {updated_count} critical stock items")
         
     except Exception as e:
-        frappe.log_error(f"Hourly critical stock check failed: {str(e)}")
+        frappe.log_error(title="Hourly critical stock check failed", message=frappe.get_traceback())
 
 def daily_ai_forecast():
     """Daily AI forecast update"""
@@ -88,12 +155,15 @@ def daily_ai_forecast():
                 frappe.logger().info(f"Queued daily AI forecast sync for company: {company}")
                 
             except Exception as e:
-                frappe.log_error(f"Failed to queue daily forecast sync for {company}: {str(e)}")
+                frappe.log_error(
+                    title=f"Failed to queue daily forecast sync for {company}",
+                    message=frappe.get_traceback()
+                )
         
         return {"status": "success", "message": f"Queued daily AI forecast sync for {len(companies)} companies"}
         
     except Exception as e:
-        frappe.log_error(f"Daily AI forecast failed: {str(e)}")
+        frappe.log_error(title="Daily AI forecast failed", message=frappe.get_traceback())
         return {"status": "error", "message": str(e)}
 
 def weekly_forecast_analysis():
@@ -123,7 +193,7 @@ def weekly_forecast_analysis():
         return {"status": "success", "companies_analyzed": len(accuracy_stats)}
         
     except Exception as e:
-        frappe.log_error(f"Weekly forecast analysis failed: {str(e)}")
+        frappe.log_error(title="Weekly forecast analysis failed", message=frappe.get_traceback())
         return {"status": "error", "message": str(e)}
 
 def optimize_forecast_performance():
@@ -146,7 +216,7 @@ def optimize_forecast_performance():
         return {"status": "success", "message": "Monthly optimization completed"}
         
     except Exception as e:
-        frappe.log_error(f"Monthly optimization failed: {str(e)}")
+        frappe.log_error(title="Monthly optimization failed", message=frappe.get_traceback())
         return {"status": "error", "message": str(e)}
 
 def cleanup_old_forecast_data():
@@ -168,5 +238,5 @@ def cleanup_old_forecast_data():
         return {"status": "success", "message": "Monthly cleanup completed"}
         
     except Exception as e:
-        frappe.log_error(f"Monthly cleanup failed: {str(e)}")
+        frappe.log_error(title="Monthly cleanup failed", message=frappe.get_traceback())
         return {"status": "error", "message": str(e)}

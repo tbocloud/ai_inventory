@@ -76,7 +76,10 @@ An intelligent inventory and sales forecasting system for ERPNext that uses AI a
 - **AI Sales Dashboard**: Comprehensive sales analytics with predictive insights per item and customer
 - **Sales Trend Analysis**: Advanced metrics including growth rates, volatility, and seasonal patterns
 - **Customer Demand Forecasting**: Predict customer purchasing behavior and seasonal demands
+- **AI Financial Forecasting**: Complete financial forecasting system with multi-currency support
 - **Financial Analytics**: Complete financial forecasting dashboard with cashflow, revenue, and expense analysis
+- **Multi-Currency Support**: Automatic currency detection and proper formatting for global operations
+- **View Analytics**: Currency-aware reporting with proper symbol display (₹, $, €, etc.)
 - **Sync Logs & Monitoring**: Comprehensive tracking of all forecast sync operations with success/failure analytics
 
 ### ⚡ **Performance & Scalability**
@@ -87,7 +90,179 @@ An intelligent inventory and sales forecasting system for ERPNext that uses AI a
 - **Error Recovery**: Automatic retry mechanisms and graceful error handling
 - **Robust Validation**: Comprehensive field validation and data integrity checks
 
-## 🔧 Installation
+## � AI Financial Forecast System
+
+### Overview
+
+The AI Financial Forecast system provides comprehensive financial forecasting capabilities with advanced analytics, multi-currency support, and intelligent predictions for cash flow, revenue, and expense planning.
+
+### 🌟 Key Features
+
+#### **Multi-Type Financial Forecasting**
+- **Cash Flow Forecasting**: Predict future cash positions with high accuracy
+- **Revenue Forecasting**: Analyze income trends and predict future earnings
+- **Expense Forecasting**: Monitor and predict operational expenses
+- **Balance Sheet Forecasting**: Comprehensive asset and liability predictions
+
+#### **Intelligent Currency Management**
+- **Automatic Currency Detection**: System automatically detects currency from:
+  1. Account-specific currency settings
+  2. Company default currency
+  3. System default currency (fallback: INR)
+- **Multi-Currency Support**: Full support for global currencies (INR, USD, EUR, GBP, JPY, CNY, etc.)
+- **Proper Currency Formatting**: Displays amounts with correct currency symbols and locale formatting
+
+#### **Advanced Analytics & Reporting**
+- **Real-time Dashboards**: Live financial health monitoring
+- **Confidence Scoring**: AI confidence levels (0-100%) for all predictions
+- **Risk Analysis**: Automatic categorization (Low, Medium, High, Critical)
+- **Trend Analysis**: Direction indicators (Increasing, Decreasing, Stable, Volatile)
+- **Accuracy Tracking**: Historical accuracy measurement and improvement suggestions
+
+### 📊 View Analytics Configuration
+
+#### **Currency Display Setup**
+
+The system automatically displays the correct currency symbol based on the following priority:
+
+1. **Account Currency**: If the forecasted account has a specific currency
+2. **Company Default Currency**: Company's default currency setting
+3. **System Default**: System-wide default currency (usually INR)
+
+#### **Supported Currency Formats**
+```
+INR: ₹1,23,456.78 (Indian Rupee)
+USD: $1,234.56 (US Dollar)
+EUR: €1.234,56 (Euro)
+GBP: £1,234.56 (British Pound)
+JPY: ¥123,456 (Japanese Yen)
+CNY: ¥1,234.56 (Chinese Yuan)
+```
+
+### 🔧 Setup Instructions
+
+#### **1. Create Financial Forecast**
+```javascript
+// Navigate to AI Financial Forecast
+frappe.set_route("List", "AI Financial Forecast");
+
+// Or create new forecast
+frappe.new_doc("AI Financial Forecast");
+```
+
+#### **2. Configure Forecast Parameters**
+- **Company**: Select the company for forecasting
+- **Account**: Choose specific account (auto-sets currency)
+- **Forecast Type**: Select from Cash Flow, Revenue, Expense
+- **Currency**: Automatically populated, can be manually overridden
+- **Forecast Period**: Set prediction timeframe (days)
+- **Confidence Threshold**: Minimum confidence level (default: 70%)
+
+#### **3. Currency Configuration**
+
+##### **Method 1: Account-Level Currency**
+```sql
+-- Set currency for specific accounts
+UPDATE `tabAccount` 
+SET account_currency = 'INR' 
+WHERE name = 'Main Bank Account';
+```
+
+##### **Method 2: Company Default Currency**
+```python
+# Set company default currency
+company = frappe.get_doc("Company", "Your Company")
+company.default_currency = "INR"
+company.save()
+```
+
+##### **Method 3: System Default Currency**
+```python
+# Set system-wide default
+frappe.db.set_single_value("System Settings", "currency", "INR")
+```
+
+### 📈 Analytics & Reports
+
+#### **Access Financial Analytics**
+1. **From DocType**: Go to AI Financial Forecast → View Analytics
+2. **From Reports**: Reports → AI Financial Analytics
+3. **From Dashboard**: AI Analytics Workspace → Financial Forecasts
+
+#### **View Analytics Features**
+- **Summary Metrics**: Total forecasts, average confidence, prediction values
+- **Performance Charts**: Trend analysis with proper currency formatting
+- **Risk Assessment**: Color-coded risk categories with explanations
+- **Accuracy Tracking**: Historical accuracy with improvement suggestions
+
+### 🚨 Troubleshooting
+
+#### **Currency Not Displaying Correctly**
+
+**Problem**: Currency shows as $ instead of ₹ or correct local currency
+
+**Solutions**:
+1. **Check Account Currency**:
+   ```python
+   account_currency = frappe.db.get_value("Account", "account_name", "account_currency")
+   print(f"Account Currency: {account_currency}")
+   ```
+
+2. **Verify Company Default**:
+   ```python
+   company_currency = frappe.db.get_value("Company", "company_name", "default_currency")
+   print(f"Company Currency: {company_currency}")
+   ```
+
+3. **Update Existing Forecasts**:
+   ```bash
+   # Run the currency update patch
+   bench --site your-site execute ai_inventory.patches.v2_0.add_currency_to_financial_forecasts.execute
+   ```
+
+#### **Forecast Accuracy Issues**
+
+**Problem**: Low confidence scores or inaccurate predictions
+
+**Solutions**:
+1. **Increase Historical Data**: Ensure sufficient transaction history (minimum 90 days)
+2. **Adjust Model Parameters**: Fine-tune confidence threshold and seasonal adjustments
+3. **Verify Data Quality**: Check for incomplete or inconsistent account data
+4. **Review External Factors**: Update external factor configurations
+
+#### **Integration Issues**
+
+**Problem**: Sync errors or failed integrations
+
+**Solutions**:
+1. **Check Sync Logs**: AI Financial Forecast → View Sync Status
+2. **Verify Permissions**: Ensure user has "AI Inventory Manager" role
+3. **Review Error Logs**: System logs for detailed error information
+4. **Manual Sync**: Use "Sync Now" button to force synchronization
+
+### 🎯 Best Practices
+
+#### **For Optimal Currency Display**
+1. Always set account-specific currencies for multi-currency operations
+2. Configure company default currencies before creating forecasts
+3. Use consistent currency codes (ISO 4217 standard)
+4. Regularly update exchange rates for multi-currency environments
+
+#### **For Accurate Forecasting**
+1. Maintain clean, consistent account data
+2. Regular historical data validation
+3. Periodic model parameter adjustment
+4. Monitor and act on accuracy feedback
+
+#### **For Performance Optimization**
+1. Limit forecast scope for large datasets
+2. Use background sync for bulk operations
+3. Regular cleanup of old forecast data
+4. Monitor system resource usage during peak operations
+
+---
+
+## �🔧 Installation
 
 ⚠️ **IMPORTANT**: Install required Python packages BEFORE installing the app to avoid migration errors.
 
@@ -161,10 +336,10 @@ chmod +x install.sh
 
 ### 1. Initial Setup
 
-1. **Navigate to AI Settings**
-   ```
-   ERPNext → AI Inventory → AI Settings
-   ```
+1. **Navigate to AI Financial Settings**
+    ```
+    ERPNext → AI Inventory → AI Financial Settings
+    ```
 
 2. **Configure Basic Settings**
    - Enable auto-sync
@@ -481,20 +656,93 @@ ERPNext → AI Inventory → AI Financial Settings
 
 ---
 
+## 🧾 AI Expense Forecast DocType Guide
+
+This section documents the AI Expense Forecast form fields and how values are computed and saved.
+
+### Where to find
+- ERPNext → AI Inventory → AI Expense Forecast
+
+### Key fields and how they’re calculated
+- Total Predicted Expense
+    - Computed on save as the sum of Expense Types and Inventory Integration fields:
+    - Expense Types: Fixed, Variable, Semi Variable, Inventory Related, Operational, Administrative
+    - Inventory Integration: Storage, Handling, Purchase Related, Reorder, Carrying, Stockout Costs
+- Confidence Score
+    - Derived from data completeness and stability; a base value is adjusted for variance and trend stability.
+- Seasonal Adjustment, Inflation Factor, Efficiency Factor
+    - Light, conservative placeholders: seasonal uplift in Nov/Dec, inflation set neutral by default, efficiency inferred from operational share.
+- Expense Growth Rate
+    - Calculated vs the previous Expense Forecast for the same company prior to the current Forecast Date.
+- Budget Variance
+    - Percent variance of total_actual_expenses vs total_predicted_expense, displayed in Analysis & Performance.
+- Alert Status
+    - Derived from risk_score: Normal, Warning (≥40), Critical (≥70).
+- Expense Breakdown (JSON)
+    - Stored on save for transparency; includes per-field amounts and totals.
+- Last Updated
+    - Timestamp set on every save.
+
+### Financial Forecast sync linkage
+- On save, the document syncs to AI Financial Forecast using:
+    - forecast_start_date = Expense Forecast’s forecast_date
+    - forecast_type = Expense
+    - predicted_amount = total_predicted_expense
+    - confidence_score mirrored
+    - forecast_details JSON includes: expense_breakdown, total_expenses, expense_growth_rate, risk_factors, and the source ID.
+
+### Tips
+- You can edit any input fields and Save to recompute totals and re-sync.
+- If you maintain actuals, set total_actual_expenses to enable Budget Variance and utilization metrics.
+
+---
+
+## 📈 Revenue Trend Analysis Report
+
+Interactive, script-powered report to analyze revenue trends with growth and seasonality insights.
+
+### Access
+- Reports → Revenue Trend Analysis Report
+- Workspace: AI Analytics → “Revenue Trend Analysis Report” link
+
+### Filters
+- Company (optional)
+- Analysis Period (Months): 6, 12, 18, 24, 36
+- Include Revenue Breakdown (checkbox)
+
+### What you’ll see
+- Month, Revenue, MoM Growth %, Confidence %, Volatility %, Trend, Forecast Count, Seasonal Factor.
+- Visual indicators for growth direction, volatility, and confidence.
+
+### Actions (menu items)
+- Revenue Breakdown: Opens a dialog with top revenue sources, shares, and confidence.
+- Growth Analysis: Current growth rate, CAGR, consistency, trend direction, volatility.
+- Seasonal Analysis: Peak/low months, seasonal intensity, factors.
+- Export Report: Exports to Excel (and PDF via server method) with multi-sheet detail.
+
+### Exports (server methods)
+- Excel/PDF generation lives in report backend and returns file content and filename; the UI triggers Excel by default.
+
+Note: If there’s no recent revenue data, the report gracefully shows sample data to avoid an empty report.
+
+---
+
 ## 🔧 Advanced Configuration
 
-### AI Settings Configuration
+### AI Settings Configuration (legacy)
 
 #### Global Settings
 ```python
-# Configure global AI parameters
-ai_settings = frappe.get_single("AI Settings")
-ai_settings.auto_sync_enabled = 1
-ai_settings.sync_frequency = "Daily"
-ai_settings.default_forecast_period = 30
-ai_settings.default_lead_time = 14
-ai_settings.confidence_threshold = 70
-ai_settings.save()
+# For newer versions use the single DocType "AI Financial Settings" in the UI.
+# The following snippet is for legacy installs that still have "AI Settings".
+# Prefer configuring via the "AI Financial Settings" form instead of code.
+# ai_settings = frappe.get_single("AI Settings")
+# ai_settings.auto_sync_enabled = 1
+# ai_settings.sync_frequency = "Daily"
+# ai_settings.default_forecast_period = 30
+# ai_settings.default_lead_time = 14
+# ai_settings.confidence_threshold = 70
+# ai_settings.save()
 ```
 
 #### Company-Specific Settings
@@ -1041,6 +1289,15 @@ frappe.db.sql("""
     ON `tabAI Inventory Forecast` (reorder_alert, company)
 """)
 ```
+
+#### 3. Invalid Email Address errors
+- Symptom: “<string> is not a valid Email Address” in Error Log when sending alerts/reports.
+- Cause: Misconfigured Notification/Auto Email Report recipient or passing user IDs instead of emails.
+- Fixes in code: All senders now resolve users → emails, dedupe, and filter invalid addresses; sends are skipped when no valid recipients remain.
+- What you can check:
+    - Settings → Notifications and Auto Email Reports: ensure Recipients are valid email addresses or roles that map to enabled users with emails.
+    - Company.default_finance_email and user records: confirm valid emails.
+    - If a legacy custom script injects recipients, remove non-email strings.
 
 ### Debug Mode
 
