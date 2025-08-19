@@ -34,7 +34,10 @@ def create_financial_forecast(
     # Validate forecast type
     valid_types = ["Cash Flow", "Revenue", "Expense", "Balance Sheet", "P&L"]
     if forecast_type not in valid_types:
-        raise ValueError(f"Forecast Type cannot be \"{forecast_type}\". It should be one of {', '.join(f'\"{t}\"' for t in valid_types)}")
+        raise ValueError(
+            f'Forecast Type cannot be "{forecast_type}". '
+            f"It should be one of {', '.join(map(repr, valid_types))}"
+        )
     
     try:
         # Get account details
